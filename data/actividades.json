@@ -36,5 +36,24 @@
     "pdfType": "application/pdf",
     "pdfUrl": "assets/Reporte_Fusion_Ramas_Git.pdf",
     "createdAt": 1791829800000
+  },
+  {
+    "id": "act-03-reporte-portafolio",
+    "nombre": "Reporte Técnico: Creación y Despliegue del Portafolio en GitHub Pages",
+    "fecha": "2026-10-19 17:40",
+    "descripcion": "Documentación técnica con capturas de pantalla del paso a paso para la inicialización, publicación en GitHub, automatización de GitHub Pages y lectura universal de archivos PDF.",
+    "grupo": "Los Técnicos - UTC (Grupos A y B)",
+    "integrantes": [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    "pdfName": "Reporte_Creacion_Portafolio_Actividades_GitHub.pdf",
+    "pdfSize": 709277,
+    "pdfType": "application/pdf",
+    "pdfUrl": "assets/Reporte_Creacion_Portafolio_Actividades_GitHub.pdf",
+    "createdAt": 1792431600000
   }
 ]
