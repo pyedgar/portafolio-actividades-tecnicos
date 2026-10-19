@@ -1,8 +1,9 @@
 /**
- * Base de datos IndexedDB para almacenar actividades y archivos PDF
+ * Base de datos IndexedDB y cargador de actividades globales
+ * Garantiza persistencia local y visibilidad universal mediante data/actividades.json
  */
 const DB_NAME = 'PortafolioActividadesDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'actividades';
 
 class PortfolioDB {
@@ -27,7 +28,7 @@ class PortfolioDB {
 
       request.onsuccess = async (event) => {
         this.db = event.target.result;
-        await this.seedInitialData();
+        await this.syncRepositoryActivities();
         resolve(this.db);
       };
 
@@ -38,32 +39,24 @@ class PortfolioDB {
     });
   }
 
-  async seedInitialData() {
-    const count = await this.countActivities();
-    if (count === 0) {
-      // Actividad inicial basada en el portafolio del curso
-      const initialActivity = {
-        id: 'act-inicial-' + Date.now(),
-        nombre: 'Actividad de Fusión e Integración de Ramas Git',
-        fecha: '2026-09-14 10:00',
-        descripcion: 'Reporte y evidencias de fusión de ramas colaborativas del equipo Los Técnicos para el portafolio general del curso de los lunes.',
-        grupo: 'Los Técnicos - UTC (Grupos A y B)',
-        integrantes: [
-          'Edgar Reyes de la Cruz',
-          'Fátima Estefanía González Lozano',
-          'Kenia Isamara Andrade Cedillo',
-          'Ramiro Alejandro Alfaro Alanis',
-          'Miguel Fuentes Hernández'
-        ],
-        pdfName: 'Act 14_09_2026 Equipo_Tecnicos.pdf',
-        pdfSize: 25804,
-        pdfType: 'application/pdf',
-        pdfUrl: 'assets/actividad_muestra.pdf',
-        pdfBlob: null,
-        createdAt: new Date('2026-09-14T10:00:00').getTime()
-      };
-
-      await this.saveActivity(initialActivity);
+  // Sincroniza las actividades públicas del repositorio (data/actividades.json)
+  // para que cualquier persona en cualquier equipo las pueda ver inmediatamente
+  async syncRepositoryActivities() {
+    try {
+      const response = await fetch('data/actividades.json');
+      if (response.ok) {
+        const publicActivities = await response.json();
+        if (Array.isArray(publicActivities)) {
+          for (const act of publicActivities) {
+            const existing = await this.getActivity(act.id);
+            if (!existing) {
+              await this.saveActivity(act);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('No se pudo cargar data/actividades.json por fetch directo:', e);
     }
   }
 
@@ -84,7 +77,6 @@ class PortfolioDB {
       const store = tx.objectStore(STORE_NAME);
       const req = store.getAll();
       req.onsuccess = () => {
-        // Ordenar por fecha descendente
         const list = req.result || [];
         list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         resolve(list);

@@ -1,0 +1,40 @@
+[
+  {
+    "id": "act-01-fusion-git",
+    "nombre": "Actividad de Fusión e Integración de Ramas Git",
+    "fecha": "2026-09-14 10:00",
+    "descripcion": "Reporte y evidencias de fusión de ramas colaborativas del equipo Los Técnicos para el portafolio general del curso de los lunes.",
+    "grupo": "Los Técnicos - UTC (Grupos A y B)",
+    "integrantes": [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    "pdfName": "Act 14_09_2026 Equipo_Tecnicos.pdf",
+    "pdfSize": 25804,
+    "pdfType": "application/pdf",
+    "pdfUrl": "assets/actividad_muestra.pdf",
+    "createdAt": 1789372800000
+  },
+  {
+    "id": "act-02-reporte-ramas",
+    "nombre": "Reporte Técnico: Fusión de Ramas en Git y Resolución de Conflictos",
+    "fecha": "2026-10-12 18:30",
+    "descripcion": "Documentación técnica detallada sobre el procedimiento de integración de ramas remotas, solución de referencias huérfanas y sincronización en GitHub.",
+    "grupo": "Los Técnicos - UTC (Grupos A y B)",
+    "integrantes": [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    "pdfName": "Reporte_Fusion_Ramas_Git.pdf",
+    "pdfSize": 643034,
+    "pdfType": "application/pdf",
+    "pdfUrl": "assets/Reporte_Fusion_Ramas_Git.pdf",
+    "createdAt": 1791829800000
+  }
+]
