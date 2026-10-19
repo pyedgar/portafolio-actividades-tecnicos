@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portafolio de Actividades - Los Técnicos | Cursos Lunes</title>
+  
+  <!-- Favicon e Iconos (Lucide Icons & Google Fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Barra de Navegación Superior -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-folder-open"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Portafolio de Actividades</h1>
+          <span>Los Técnicos • Universidad Tecnológica de Coahuila</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btnBackup" class="btn btn-secondary" title="Exportar o respaldar actividades">
+          <i class="fa-solid fa-download"></i>
+          <span>Respaldar</span>
+        </button>
+        <button id="btnRestore" class="btn btn-secondary" title="Importar actividades desde archivo">
+          <i class="fa-solid fa-upload"></i>
+          <span>Importar</span>
+        </button>
+        <input type="file" id="fileRestoreInput" accept=".json" style="display:none;">
+        <button id="btnOpenModal" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i>
+          <span>Nueva Actividad</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner Informativo del Equipo -->
+  <section class="team-banner">
+    <div class="container">
+      <div class="banner-content">
+        <div class="banner-badge">
+          <i class="fa-solid fa-users"></i> Equipo Oficial - Cursos Lunes
+        </div>
+        <h2>Repositorio de Actividades y Documentación PDF</h2>
+        <p>Espacio colaborativo de entrega, consulta y lectura de actividades académicas para los grupos A y B.</p>
+        
+        <div class="team-chips" id="teamChipsContainer">
+          <!-- Integrantes oficiales cargados dinámicamente -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel de Métricas / Resumen -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon icon-blue">
+            <i class="fa-solid fa-list-check"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="statTotalActivities">0</span>
+            <span class="stat-label">Actividades Registradas</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon icon-emerald">
+            <i class="fa-solid fa-file-pdf"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="statTotalPdfs">0</span>
+            <span class="stat-label">Documentos PDF Disponibles</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon icon-violet">
+            <i class="fa-solid fa-user-group"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value" id="statTotalMembers">5</span>
+            <span class="stat-label">Integrantes del Equipo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Área Principal de Actividades con Filtros -->
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- Barra de Filtros y Búsqueda -->
+      <div class="controls-panel">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" placeholder="Buscar por actividad, descripción, grupo o integrante...">
+          <button id="btnClearSearch" class="btn-clear-search" title="Limpiar búsqueda" style="display:none;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="filterGroup"><i class="fa-solid fa-layer-group"></i> Grupo:</label>
+            <select id="filterGroup">
+              <option value="todos">Todos los grupos</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterMember"><i class="fa-solid fa-user"></i> Integrante:</label>
+            <select id="filterMember">
+              <option value="todos">Todos los integrantes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista / Grid de Actividades -->
+      <div id="activitiesGrid" class="activities-grid">
+        <!-- Render dinámico aquí -->
+      </div>
+
+      <!-- Estado Vacío -->
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">
+          <i class="fa-solid fa-folder-open"></i>
+        </div>
+        <h3 id="emptyTitle">No hay actividades para mostrar</h3>
+        <p id="emptySubtitle">Comienza creando tu primera actividad con un archivo PDF para visualizarlo aquí.</p>
+        <button id="btnEmptyCreate" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i> Crear Actividad
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modal para Crear Actividad -->
+  <div id="modalCreateActivity" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon">
+            <i class="fa-solid fa-file-circle-plus"></i>
+          </div>
+          <div>
+            <h3>Nueva Actividad</h3>
+            <p>Registra la actividad y sube el archivo PDF para lectura</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseModal" title="Cerrar ventana">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="activityForm" class="modal-body">
+        
+        <!-- Nombre de la Actividad -->
+        <div class="form-group">
+          <label for="activityName" class="form-label">
+            <span>Nombre de la Actividad</span>
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="activityName" class="form-control" placeholder="Ej. Actividad 1 - Diagramas y Modelos de Base de Datos" required>
+        </div>
+
+        <!-- Fila: Fecha y Grupo -->
+        <div class="form-row">
+          
+          <!-- Fecha (Automática) -->
+          <div class="form-group col-half">
+            <div class="label-with-badge">
+              <label for="activityDate" class="form-label">
+                <span>Fecha de Registro</span>
+                <span class="required">*</span>
+              </label>
+              <span class="badge-auto" title="Se establece automáticamente con la fecha y hora de hoy">
+                <i class="fa-solid fa-clock"></i> Automática
+              </span>
+            </div>
+            <div class="input-with-button">
+              <input type="datetime-local" id="activityDate" class="form-control" required>
+              <button type="button" id="btnNowDate" class="btn-icon-inside" title="Actualizar al momento exacto actual">
+                <i class="fa-solid fa-arrows-rotate"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Grupo -->
+          <div class="form-group col-half">
+            <label for="activityGroup" class="form-label">
+              <span>Grupo</span>
+              <span class="required">*</span>
+            </label>
+            <input type="text" id="activityGroup" class="form-control" list="gruposPredefinidos" placeholder="Selecciona o escribe el grupo" value="Los Técnicos - UTC (Grupos A y B)" required>
+            <datalist id="gruposPredefinidos">
+              <option value="Los Técnicos - UTC (Grupos A y B)">
+              <option value="Grupo A">
+              <option value="Grupo B">
+              <option value="Cursos Lunes">
+              <option value="Técnicos Grupo A">
+              <option value="Técnicos Grupo B">
+            </datalist>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-group">
+          <label for="activityDescription" class="form-label">Descripción de la Actividad</label>
+          <textarea id="activityDescription" class="form-control" rows="3" placeholder="Describe brevemente de qué trata la actividad, objetivos o notas relevantes..."></textarea>
+        </div>
+
+        <!-- Integrantes -->
+        <div class="form-group">
+          <div class="label-with-actions">
+            <label class="form-label">
+              <span>Integrantes del Equipo</span>
+              <span class="required">*</span>
+            </label>
+            <div class="quick-member-actions">
+              <button type="button" id="btnSelectAllMembers" class="btn-link">Seleccionar todos</button>
+              <span>•</span>
+              <button type="button" id="btnDeselectAllMembers" class="btn-link">Deseleccionar</button>
+            </div>
+          </div>
+          
+          <div class="members-selection-box" id="membersCheckboxContainer">
+            <!-- Checkboxes de los 5 integrantes cargados dinámicamente -->
+          </div>
+
+          <!-- Opción para agregar un integrante extra si fuera necesario -->
+          <div class="add-extra-member">
+            <input type="text" id="extraMemberInput" class="form-control form-control-sm" placeholder="¿Otro integrante adicional? Escribe su nombre">
+            <button type="button" id="btnAddExtraMember" class="btn btn-secondary btn-sm">
+              <i class="fa-solid fa-plus"></i> Agregar
+            </button>
+          </div>
+        </div>
+
+        <!-- Subida de PDF -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Archivo PDF de la Actividad</span>
+            <span class="required">*</span>
+          </label>
+          
+          <div class="pdf-dropzone" id="pdfDropzone">
+            <input type="file" id="pdfFileInput" accept="application/pdf" style="display: none;">
+            
+            <div class="dropzone-idle" id="dropzoneIdle">
+              <div class="dropzone-icon">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <p class="dropzone-text">Arrastra y suelta tu archivo PDF aquí o <span class="highlight">haz clic para examinar</span></p>
+              <span class="dropzone-hint">Formatos soportados: PDF (.pdf) • Visualizable directamente en navegador</span>
+            </div>
+
+            <div class="dropzone-selected" id="dropzoneSelected" style="display: none;">
+              <div class="selected-pdf-icon">
+                <i class="fa-solid fa-file-pdf"></i>
+              </div>
+              <div class="selected-pdf-details">
+                <strong id="selectedPdfName">archivo.pdf</strong>
+                <span id="selectedPdfSize">0 KB</span>
+              </div>
+              <button type="button" id="btnRemovePdf" class="btn-remove-file" title="Quitar archivo">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveActivity">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Actividad
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Visor de PDF (Lectura y visualización) -->
+  <div id="modalPdfViewer" class="modal-backdrop viewer-backdrop" style="display: none;">
+    <div class="viewer-window">
+      
+      <div class="viewer-header">
+        <div class="viewer-title-info">
+          <div class="pdf-icon-badge">
+            <i class="fa-solid fa-file-pdf"></i>
+          </div>
+          <div class="viewer-titles">
+            <h4 id="viewerActivityName">Nombre de la Actividad</h4>
+            <span id="viewerFileName">documento.pdf</span>
+          </div>
+        </div>
+
+        <div class="viewer-actions">
+          <button id="btnDownloadPdf" class="btn btn-secondary btn-sm" title="Descargar este archivo PDF">
+            <i class="fa-solid fa-download"></i> Descargar
+          </button>
+          <button id="btnOpenNewTab" class="btn btn-secondary btn-sm" title="Abrir PDF en una pestaña completa">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Nueva Pestaña
+          </button>
+          <button id="btnCloseViewer" class="btn-close-viewer" title="Cerrar visor">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Metadata rápida del documento -->
+      <div class="viewer-meta-bar">
+        <div class="meta-item">
+          <i class="fa-regular fa-calendar"></i>
+          <span id="viewerDate">Fecha</span>
+        </div>
+        <div class="meta-item">
+          <i class="fa-solid fa-users"></i>
+          <span id="viewerMembers">Integrantes</span>
+        </div>
+        <div class="meta-item">
+          <i class="fa-solid fa-tag"></i>
+          <span id="viewerGroup">Grupo</span>
+        </div>
+      </div>
+
+      <!-- Contenedor del PDF Embebido -->
+      <div class="viewer-frame-container" id="viewerContainer">
+        <iframe id="pdfFrame" src="about:blank" frameborder="0"></iframe>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Contenedor de Alertas Toast -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Footer con Créditos y Estado de Despliegue -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>© 2026 <strong>Los Técnicos</strong> • Portafolio de Actividades de Cursos Lunes • Universidad Tecnológica de Coahuila</p>
+      <p class="footer-links">
+        <span><i class="fa-brands fa-github"></i> Listo para GitHub Pages</span>
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
