@@ -1,14 +1,33 @@
 /**
  * Base de datos universal y gestor de actividades
- * Triple redundancia: Memoria + IndexedDB + Catálogo Oficial
+ * Catálogo Oficial con las 6 actividades organizadas en la carpeta actividades_pdf
  */
 
 const OFFICIAL_CATALOG = [
   {
-    id: "act-01-fusion-git",
-    nombre: "Actividad de Fusión e Integración de Ramas Git",
+    id: "act-01-acki",
+    nombre: "Actividad 1: Portafolio Colaborativo - Equipo ACKI",
+    fecha: "2026-09-07 10:00",
+    descripcion: "Actividad inicial del curso sobre control de versiones y portafolio de proyectos académicos.",
+    grupo: "Los Técnicos - UTC (Equipo ACKI)",
+    integrantes: [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    pdfName: "Act1 07_09_2026 ACKI.pdf",
+    pdfSize: 253387,
+    pdfType: "application/pdf",
+    pdfUrl: "actividades_pdf/Act1 07_09_2026 ACKI.pdf",
+    createdAt: 1788768000000
+  },
+  {
+    id: "act-02-equipo-tecnicos",
+    nombre: "Actividad 2: Fusión e Integración de Ramas - Los Técnicos",
     fecha: "2026-09-14 10:00",
-    descripcion: "Reporte y evidencias de fusión de ramas colaborativas del equipo Los Técnicos para el portafolio general del curso de los lunes.",
+    descripcion: "Evidencias y reporte de fusión de ramas colaborativas del equipo Los Técnicos para el portafolio general del curso de los lunes.",
     grupo: "Los Técnicos - UTC (Grupos A y B)",
     integrantes: [
       "Edgar Reyes de la Cruz",
@@ -17,14 +36,52 @@ const OFFICIAL_CATALOG = [
       "Ramiro Alejandro Alfaro Alanis",
       "Miguel Fuentes Hernández"
     ],
-    pdfName: "Act 14_09_2026 Equipo_Tecnicos.pdf",
+    pdfName: "Act2 14_09_2026 Equipo_Tecnicos.pdf",
     pdfSize: 25804,
     pdfType: "application/pdf",
-    pdfUrl: "assets/actividad_muestra.pdf",
+    pdfUrl: "actividades_pdf/Act2 14_09_2026 Equipo_Tecnicos.pdf",
     createdAt: 1789372800000
   },
   {
-    id: "act-02-reporte-ramas",
+    id: "act-03-preguntas-git-github",
+    nombre: "Cuestionario Técnico: Preguntas sobre Git y Ramas en GitHub",
+    fecha: "2026-09-28 12:00",
+    descripcion: "Respuestas técnicas y fundamentos teóricos sobre el ciclo de vida de ramas, resolución de conflictos y flujo colaborativo en GitHub.",
+    grupo: "Los Técnicos - UTC (Cursos Lunes)",
+    integrantes: [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    pdfName: "Preguntas_Git_y_GitHub_Ramas.pdf",
+    pdfSize: 82515,
+    pdfType: "application/pdf",
+    pdfUrl: "actividades_pdf/Preguntas_Git_y_GitHub_Ramas.pdf",
+    createdAt: 1790582400000
+  },
+  {
+    id: "act-04-proyecto-agencia-marketing",
+    nombre: "Presentación de Proyecto: Agencia de Marketing Digital",
+    fecha: "2026-10-05 14:00",
+    descripcion: "Diapositivas corporativas de propuesta y desarrollo para el proyecto de agencia de marketing digital del equipo.",
+    grupo: "Los Técnicos - UTC",
+    integrantes: [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    pdfName: "Presentacion_Proyecto_Agencia_Marketing.pdf",
+    pdfSize: 7303598,
+    pdfType: "application/pdf",
+    pdfUrl: "actividades_pdf/Presentacion_Proyecto_Agencia_Marketing.pdf",
+    createdAt: 1791187200000
+  },
+  {
+    id: "act-05-reporte-ramas",
     nombre: "Reporte Técnico: Fusión de Ramas en Git y Resolución de Conflictos",
     fecha: "2026-10-12 18:30",
     descripcion: "Documentación técnica detallada sobre el procedimiento de integración de ramas remotas, solución de referencias huérfanas y sincronización en GitHub.",
@@ -39,11 +96,11 @@ const OFFICIAL_CATALOG = [
     pdfName: "Reporte_Fusion_Ramas_Git.pdf",
     pdfSize: 643034,
     pdfType: "application/pdf",
-    pdfUrl: "assets/Reporte_Fusion_Ramas_Git.pdf",
+    pdfUrl: "actividades_pdf/Reporte_Fusion_Ramas_Git.pdf",
     createdAt: 1791829800000
   },
   {
-    id: "act-03-repositorio-ramas-integrantes",
+    id: "act-06-repositorio-ramas-integrantes",
     nombre: "Actividad 3: Repositorio en GitHub y Subida de Páginas Personales en Ramas por Integrante",
     fecha: "2026-10-19 18:30",
     descripcion: "Reporte oficial y evidencia técnica de la creación en equipo del repositorio en GitHub, configuración de ramas individuales con nomenclatura NOMBRE_APELLIDO (ej. ALAN_DIAZ) para cada integrante, subida de proyectos personales y fusión ordenada a main.",
@@ -58,13 +115,13 @@ const OFFICIAL_CATALOG = [
     pdfName: "Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
     pdfSize: 740124,
     pdfType: "application/pdf",
-    pdfUrl: "assets/Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
+    pdfUrl: "actividades_pdf/Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
     createdAt: 1792434600000
   }
 ];
 
 const DEPRECATED_IDS = ['act-03-reporte-portafolio', 'act-04-guia-ramas-actividades'];
-const DB_NAME = 'PortafolioTecnicosUniversal_v5';
+const DB_NAME = 'PortafolioTecnicosUniversal_v6';
 const DB_VERSION = 1;
 const STORE_NAME = 'actividades';
 
@@ -72,7 +129,6 @@ class PortfolioDB {
   constructor() {
     this.db = null;
     this.memoryStore = new Map();
-    // Pre-cargar catálogo oficial en memoria
     OFFICIAL_CATALOG.forEach(act => this.memoryStore.set(act.id, { ...act }));
   }
 
@@ -116,18 +172,15 @@ class PortfolioDB {
   }
 
   async getAllActivities() {
-    // 1. Catálogo oficial base
     const map = new Map();
     OFFICIAL_CATALOG.forEach(act => {
       if (!DEPRECATED_IDS.includes(act.id)) map.set(act.id, { ...act });
     });
 
-    // 2. Actividades en memoria de la sesión
     this.memoryStore.forEach((act, id) => {
       if (!DEPRECATED_IDS.includes(id)) map.set(id, act);
     });
 
-    // 3. Actividades en IndexedDB
     try {
       const db = await this.init();
       if (db) {
@@ -186,14 +239,11 @@ class PortfolioDB {
   }
 
   async saveActivity(activity) {
-    // 1. Inmediatamente registrar en memoria (garantiza que la interfaz actualice siempre)
     this.memoryStore.set(activity.id, activity);
 
-    // 2. Persistir en IndexedDB de forma asíncrona segura
     try {
       const db = await this.init();
       if (db) {
-        // Asegurarse de que pdfBlob sea un Blob estándar para evitar DataCloneError
         let serializable = { ...activity };
         if (serializable.pdfBlob && typeof serializable.pdfBlob.slice === 'function') {
           serializable.pdfBlob = new Blob([serializable.pdfBlob], { type: serializable.pdfType || 'application/pdf' });

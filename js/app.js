@@ -540,7 +540,7 @@ window.openPdfViewer = async function(activityId) {
     currentViewerBlobUrl = URL.createObjectURL(activity.pdfBlob);
     pdfSrc = currentViewerBlobUrl;
   } else if (activity.pdfUrl) {
-    pdfSrc = activity.pdfUrl;
+    pdfSrc = encodeURI(activity.pdfUrl);
   }
 
   if (!pdfSrc) {
