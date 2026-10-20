@@ -1,127 +1,231 @@
 /**
- * Base de datos IndexedDB y cargador de actividades globales
- * Garantiza persistencia local y visibilidad universal mediante data/actividades.json
+ * Base de datos y gestor de actividades
+ * Soporta IndexedDB con respaldo en memoria y carga directa de actividades oficiales
  */
-const DB_NAME = 'PortafolioActividadesDB';
-const DB_VERSION = 3;
+
+const DEFAULT_ACTIVITIES = [
+  {
+    id: "act-01-fusion-git",
+    nombre: "Actividad de Fusión e Integración de Ramas Git",
+    fecha: "2026-09-14 10:00",
+    descripcion: "Reporte y evidencias de fusión de ramas colaborativas del equipo Los Técnicos para el portafolio general del curso de los lunes.",
+    grupo: "Los Técnicos - UTC (Grupos A y B)",
+    integrantes: [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    pdfName: "Act 14_09_2026 Equipo_Tecnicos.pdf",
+    pdfSize: 25804,
+    pdfType: "application/pdf",
+    pdfUrl: "assets/actividad_muestra.pdf",
+    createdAt: 1789372800000
+  },
+  {
+    id: "act-02-reporte-ramas",
+    nombre: "Reporte Técnico: Fusión de Ramas en Git y Resolución de Conflictos",
+    fecha: "2026-10-12 18:30",
+    descripcion: "Documentación técnica detallada sobre el procedimiento de integración de ramas remotas, solución de referencias huérfanas y sincronización en GitHub.",
+    grupo: "Los Técnicos - UTC (Grupos A y B)",
+    integrantes: [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    pdfName: "Reporte_Fusion_Ramas_Git.pdf",
+    pdfSize: 643034,
+    pdfType: "application/pdf",
+    pdfUrl: "assets/Reporte_Fusion_Ramas_Git.pdf",
+    createdAt: 1791829800000
+  },
+  {
+    id: "act-03-repositorio-ramas-integrantes",
+    nombre: "Actividad 3: Repositorio en GitHub y Subida de Páginas Personales en Ramas por Integrante",
+    fecha: "2026-10-19 18:30",
+    descripcion: "Reporte oficial y evidencia técnica de la creación en equipo del repositorio en GitHub, configuración de ramas individuales con nomenclatura NOMBRE_APELLIDO (ej. ALAN_DIAZ) para cada integrante, subida de proyectos personales y fusión ordenada a main.",
+    grupo: "Los Técnicos - UTC (Cursos Lunes)",
+    integrantes: [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    pdfName: "Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
+    pdfSize: 740124,
+    pdfType: "application/pdf",
+    pdfUrl: "assets/Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
+    createdAt: 1792434600000
+  }
+];
+
+const DEPRECATED_IDS = ['act-03-reporte-portafolio', 'act-04-guia-ramas-actividades'];
+
+const DB_NAME = 'PortafolioActividadesDB_v4';
+const DB_VERSION = 1;
 const STORE_NAME = 'actividades';
 
 class PortfolioDB {
   constructor() {
     this.db = null;
+    this.initPromise = null;
   }
 
   async init() {
     if (this.db) return this.db;
+    if (this.initPromise) return this.initPromise;
 
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          store.createIndex('fecha', 'fecha', { unique: false });
-          store.createIndex('grupo', 'grupo', { unique: false });
+    this.initPromise = new Promise((resolve) => {
+      try {
+        if (typeof indexedDB === 'undefined') {
+          console.warn('IndexedDB no soportado.');
+          return resolve(null);
         }
-      };
 
-      request.onsuccess = async (event) => {
-        this.db = event.target.result;
-        await this.syncRepositoryActivities();
-        resolve(this.db);
-      };
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-      request.onerror = (event) => {
-        console.error('Error al abrir IndexedDB:', event.target.error);
-        reject(event.target.error);
-      };
-    });
-  }
+        request.onblocked = () => {
+          console.warn('IndexedDB bloqueado.');
+          resolve(null);
+        };
 
-  // Sincroniza las actividades públicas del repositorio (data/actividades.json)
-  // para que cualquier persona en cualquier equipo las pueda ver inmediatamente
-  async syncRepositoryActivities() {
-    try {
-      // Eliminar identificadores obsoletos o duplicados anteriores
-      const deprecatedIds = ['act-03-reporte-portafolio', 'act-04-guia-ramas-actividades'];
-      for (const depId of deprecatedIds) {
-        try {
-          const obsolete = await this.getActivity(depId);
-          if (obsolete) await this.deleteActivity(depId);
-        } catch (_) {}
-      }
-
-      const response = await fetch('data/actividades.json');
-      if (response.ok) {
-        const publicActivities = await response.json();
-        if (Array.isArray(publicActivities)) {
-          for (const act of publicActivities) {
-            await this.saveActivity(act);
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            store.createIndex('fecha', 'fecha', { unique: false });
+            store.createIndex('grupo', 'grupo', { unique: false });
           }
-        }
-      }
-    } catch (e) {
-      console.warn('No se pudo cargar data/actividades.json por fetch directo:', e);
-    }
-  }
+        };
 
-  async countActivities() {
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([STORE_NAME], 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.count();
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
+        request.onsuccess = (event) => {
+          this.db = event.target.result;
+          resolve(this.db);
+        };
+
+        request.onerror = (event) => {
+          console.warn('Error al abrir IndexedDB:', event.target.error);
+          resolve(null);
+        };
+      } catch (e) {
+        console.warn('Excepción al inicializar IndexedDB:', e);
+        resolve(null);
+      }
     });
+
+    return this.initPromise;
   }
 
   async getAllActivities() {
-    await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([STORE_NAME], 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.getAll();
-      req.onsuccess = () => {
-        const list = req.result || [];
-        list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        resolve(list);
-      };
-      req.onerror = () => reject(req.error);
+    let localItems = [];
+    try {
+      const db = await this.init();
+      if (db) {
+        localItems = await new Promise((resolve) => {
+          try {
+            const tx = db.transaction([STORE_NAME], 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+          } catch (_) {
+            resolve([]);
+          }
+        });
+      }
+    } catch (_) {}
+
+    // Intentar traer data/actividades.json actualizada
+    let publicCatalog = DEFAULT_ACTIVITIES;
+    try {
+      const res = await fetch('data/actividades.json?v=' + Date.now());
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json) && json.length > 0) {
+          publicCatalog = json;
+        }
+      }
+    } catch (_) {}
+
+    // Fusionar catálogo oficial y actividades locales del usuario
+    const map = new Map();
+    publicCatalog.forEach(act => {
+      if (!DEPRECATED_IDS.includes(act.id)) {
+        map.set(act.id, act);
+      }
     });
+
+    localItems.forEach(act => {
+      if (!DEPRECATED_IDS.includes(act.id)) {
+        map.set(act.id, act);
+      }
+    });
+
+    const list = Array.from(map.values());
+    list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    return list;
   }
 
   async getActivity(id) {
-    await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([STORE_NAME], 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.get(id);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+    if (DEPRECATED_IDS.includes(id)) return null;
+
+    try {
+      const db = await this.init();
+      if (db) {
+        const item = await new Promise((resolve) => {
+          try {
+            const tx = db.transaction([STORE_NAME], 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.get(id);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+          } catch (_) {
+            resolve(null);
+          }
+        });
+        if (item) return item;
+      }
+    } catch (_) {}
+
+    return DEFAULT_ACTIVITIES.find(a => a.id === id) || null;
   }
 
   async saveActivity(activity) {
-    await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([STORE_NAME], 'readwrite');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.put(activity);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+    try {
+      const db = await this.init();
+      if (db) {
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction([STORE_NAME], 'readwrite');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.put(activity);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+    } catch (e) {
+      console.warn('No se pudo guardar en IndexedDB:', e);
+    }
+    return activity;
   }
 
   async deleteActivity(id) {
-    await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([STORE_NAME], 'readwrite');
-      const store = tx.objectStore(STORE_NAME);
-      const req = store.delete(id);
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
-    });
+    try {
+      const db = await this.init();
+      if (db) {
+        await new Promise((resolve) => {
+          const tx = db.transaction([STORE_NAME], 'readwrite');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.delete(id);
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => resolve(false);
+        });
+      }
+    } catch (_) {}
+    return true;
   }
 
   // Exportar todas las actividades como respaldo JSON

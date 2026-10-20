@@ -347,14 +347,21 @@ async function handleFormSubmit(e) {
 // Cargar y mostrar actividades
 async function loadAndRenderActivities() {
   try {
-    allActivities = await window.portfolioDB.getAllActivities();
-    updateStats();
-    updateFilterDropdowns();
-    filterActivities();
+    if (window.portfolioDB) {
+      allActivities = await window.portfolioDB.getAllActivities();
+    } else if (typeof DEFAULT_ACTIVITIES !== 'undefined') {
+      allActivities = DEFAULT_ACTIVITIES;
+    }
   } catch (err) {
     console.error('Error al cargar actividades:', err);
-    showToast('Error al conectar con la base de datos local.', 'danger');
+    if (typeof DEFAULT_ACTIVITIES !== 'undefined') {
+      allActivities = DEFAULT_ACTIVITIES;
+    }
   }
+
+  updateStats();
+  updateFilterDropdowns();
+  filterActivities();
 }
 
 // Actualizar estadísticas
