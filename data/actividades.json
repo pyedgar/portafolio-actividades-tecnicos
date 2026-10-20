@@ -55,5 +55,24 @@
     "pdfType": "application/pdf",
     "pdfUrl": "assets/Reporte_Creacion_Portafolio_Actividades_GitHub.pdf",
     "createdAt": 1792431600000
+  },
+  {
+    "id": "act-04-guia-ramas-actividades",
+    "nombre": "Reporte Técnico: Creación de Repositorio, Ramas y Subida de Actividades",
+    "fecha": "2026-10-19 18:05",
+    "descripcion": "Guía ilustrada con evidencias de cómo se crea el repositorio, cómo se configuran las ramas de trabajo del equipo y cómo se suben actividades desde la web y mediante Git.",
+    "grupo": "Los Técnicos - UTC (Grupos A y B)",
+    "integrantes": [
+      "Edgar Reyes de la Cruz",
+      "Fátima Estefanía González Lozano",
+      "Kenia Isamara Andrade Cedillo",
+      "Ramiro Alejandro Alfaro Alanis",
+      "Miguel Fuentes Hernández"
+    ],
+    "pdfName": "Reporte_Creacion_Repositorio_Ramas_Actividades.pdf",
+    "pdfSize": 469582,
+    "pdfType": "application/pdf",
+    "pdfUrl": "assets/Reporte_Creacion_Repositorio_Ramas_Actividades.pdf",
+    "createdAt": 1792433100000
   }
 ]

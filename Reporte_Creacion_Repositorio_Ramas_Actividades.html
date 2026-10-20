@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte Técnico: Creación del Repositorio, Configuración de Ramas y Subida de Actividades con Visor de PDF</title>
+  <style>
+    :root {
+      --primary: #1a365d;
+      --secondary: #2b6cb0;
+      --accent: #3182ce;
+      --text: #2d3748;
+      --text-muted: #718096;
+      --bg-card: #f7fafc;
+      --border: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --success-bg: #f0fff4;
+      --success-border: #9ae6b4;
+      --success-text: #22543d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: #f0f4f8;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 50px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-banner {
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 24px;
+      margin-bottom: 30px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #ebf8ff;
+      color: var(--secondary);
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.05rem;
+      color: var(--primary);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 24px;
+      margin-bottom: 32px;
+    }
+
+    .meta-item {
+      font-size: 0.9rem;
+    }
+
+    .meta-item strong {
+      display: block;
+      color: var(--primary);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 3px;
+    }
+
+    .callout {
+      background: #edf2f7;
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+      font-size: 0.95rem;
+    }
+
+    .callout strong {
+      color: var(--primary);
+    }
+
+    h2 {
+      font-size: 1.45rem;
+      color: var(--primary);
+      border-bottom: 2px solid #edf2f7;
+      padding-bottom: 8px;
+      margin: 36px 0 16px;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      color: var(--secondary);
+      margin: 20px 0 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      font-size: 0.98rem;
+    }
+
+    ul, ol {
+      margin: 12px 0 20px 24px;
+    }
+
+    li {
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.88em;
+      background: #edf2f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #b83280;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: #e2e8f0;
+      padding: 18px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin: 16px 0 24px;
+    }
+
+    .figure {
+      margin: 28px 0;
+      text-align: center;
+    }
+
+    .figure img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .figure-caption {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 8px;
+    }
+
+    .success-box {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-left: 4px solid #38a169;
+      color: var(--success-text);
+      padding: 14px 18px;
+      border-radius: 6px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+    }
+
+    .footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; padding: 20px 30px; }
+      pre { white-space: pre-wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="header-banner">
+      <div class="badge">Universidad Tecnológica de Coahuila • Portafolio General Cursos Lunes</div>
+      <h1>Reporte Técnico: Creación del Repositorio, Configuración de Ramas y Subida de Actividades con Visor de PDF</h1>
+      <p class="subtitle">Guía paso a paso ilustrada con capturas de pantalla sobre control de versiones Git, ramas colaborativas para el equipo Los Técnicos y despliegue continuo en GitHub Pages.</p>
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Equipo Oficial</strong>
+        Los Técnicos (UTC - Grupos A y B)
+      </div>
+      <div class="meta-item">
+        <strong>Fecha de Publicación</strong>
+        19 de Octubre de 2026
+      </div>
+      <div class="meta-item">
+        <strong>Repositorio GitHub</strong>
+        <a href="https://github.com/pyedgar/portafolio-actividades-tecnicos" target="_blank">pyedgar/portafolio-actividades-tecnicos</a>
+      </div>
+      <div class="meta-item">
+        <strong>Sitio Web Publicado</strong>
+        <a href="https://pyedgar.github.io/portafolio-actividades-tecnicos/" target="_blank">pyedgar.github.io/portafolio-actividades-tecnicos/</a>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>INTEGRANTES OFICIALES:</strong> Edgar Reyes de la Cruz • Fátima Estefanía González Lozano • Kenia Isamara Andrade Cedillo • Ramiro Alejandro Alfaro Alanis • Miguel Fuentes Hernández.
+    </div>
+
+    <h2>1. Introducción y Justificación del Sistema</h2>
+    <p>El propósito de este informe es documentar de forma clara y visual cómo se creó el repositorio central en GitHub, cómo se configuró la arquitectura de ramas para el trabajo en equipo y cómo se suben actividades y documentos PDF para que cualquier usuario o docente pueda consultarlos y leerlos directamente en el navegador.</p>
+
+    <h2>2. Creación y Configuración del Repositorio en GitHub</h2>
+    <p>Se inicializó el repositorio remoto <code>portafolio-actividades-tecnicos</code> bajo la cuenta oficial <code>pyedgar</code> con visibilidad pública para permitir el acceso libre a través de GitHub Pages:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/rama1_creacion_repo.png" alt="Creación de Repositorio en GitHub">
+      <p class="figure-caption">Figura 1: Proceso de creación y parametrización del repositorio en GitHub con comandos de vinculación inicial.</p>
+    </div>
+
+    <pre><code># Comandos de inicialización local y vinculación remota
+cd "C:\Users\ed\.gemini\antigravity\scratch\portafolio-actividades"
+git init
+git add .
+git commit -m "feat: Inicializar portafolio de actividades con visor de PDF"
+git branch -M main
+git remote add origin https://github.com/pyedgar/portafolio-actividades-tecnicos.git
+git push -u origin main</code></pre>
+
+    <h2>3. Configuración y Gestión de Ramas Colaborativas (Git Branches)</h2>
+    <p>Para evitar conflictos de fusión (merge conflicts) y permitir que cada alumno suba sus avances sin interferir en los demás, se creó una rama de trabajo individual para cada integrante del equipo Los Técnicos:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/rama2_configuracion_ramas.png" alt="Estructura de Ramas Colaborativas">
+      <p class="figure-caption">Figura 2: Estructura de ramas remotas activas en GitHub y comandos de conmutación de branches.</p>
+    </div>
+
+    <ul>
+      <li><strong><code>main</code>:</strong> Rama principal de producción enlazada con GitHub Pages.</li>
+      <li><strong><code>E_Reyes</code>:</strong> Rama de trabajo de Edgar Reyes de la Cruz.</li>
+      <li><strong><code>F_Gonzalez</code>:</strong> Rama de trabajo de Fátima Estefanía González Lozano.</li>
+      <li><strong><code>K_Andrade</code>:</strong> Rama de trabajo de Kenia Isamara Andrade Cedillo.</li>
+      <li><strong><code>R_Alanis</code>:</strong> Rama de trabajo de Ramiro Alejandro Alfaro Alanis.</li>
+      <li><strong><code>M_Fuentes</code>:</strong> Rama de trabajo de Miguel Fuentes Hernández.</li>
+    </ul>
+
+    <pre><code># Crear una rama personal de trabajo y subirla a GitHub:
+git checkout -b E_Reyes
+git push -u origin E_Reyes
+
+# Cambiar entre ramas existentes:
+git checkout main         # Regresa a la rama principal
+git checkout E_Reyes      # Cambia a tu rama de trabajo</code></pre>
+
+    <h2>4. Cómo Subir Actividades: Método 1 (Plataforma Web Interactiva)</h2>
+    <p>La plataforma cuenta con un formulario interactivo accesible mediante el botón <strong>«+ Nueva Actividad»</strong>:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/rama3_subir_actividades_web.png" alt="Subida de Actividades desde la Web">
+      <p class="figure-caption">Figura 3: Flujo de 4 pasos para registrar actividades y visualizar archivos PDF en la plataforma web.</p>
+    </div>
+
+    <ol>
+      <li><strong>Nombre de Actividad:</strong> Identificador claro de la entrega.</li>
+      <li><strong>Fecha Automática:</strong> Se asigna automáticamente con el día y la hora exacta del sistema, con botón de sincronización instantánea.</li>
+      <li><strong>Descripción:</strong> Resumen, instrucciones u objetivos de la actividad.</li>
+      <li><strong>Grupo:</strong> Selección predefinida de <em>Los Técnicos - UTC (Grupos A y B)</em>.</li>
+      <li><strong>Integrantes:</strong> Casillas de verificación para marcar a los miembros participantes.</li>
+      <li><strong>Subir PDF:</strong> Zona interactiva Drag & Drop para arrastrar y soltar el archivo <code>.pdf</code>.</li>
+    </ol>
+
+    <h2>5. Cómo Subir Actividades: Método 2 (Control de Versiones en Git)</h2>
+    <p>Para asegurar que una actividad quede almacenada en el repositorio y sea visible para cualquier persona en cualquier equipo mediante GitHub Pages:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/rama4_subir_actividades_git.png" alt="Subida de Actividades con Git">
+      <p class="figure-caption">Figura 4: Flujo técnico en terminal para publicar actividades en data/actividades.json y sincronizar con Git.</p>
+    </div>
+
+    <pre><code># 1. Copiar el PDF en la carpeta assets/
+Copy-Item "Mi_Actividad.pdf" "assets/Actividad_04.pdf"
+
+# 2. Registrar en data/actividades.json la actividad con sus metadatos y la ruta "assets/Actividad_04.pdf"
+
+# 3. Guardar cambios en tu rama y subir a GitHub:
+git checkout -b E_Reyes
+git add assets/Actividad_04.pdf data/actividades.json
+git commit -m "feat: Agregar Actividad 4 y PDF"
+git push origin E_Reyes</code></pre>
+
+    <h2>6. Fusión de Ramas (Merge) y Despliegue en GitHub Pages</h2>
+    <p>Para integrar los aportes de las ramas individuales hacia la rama principal <code>main</code> y activar la actualización en vivo de GitHub Pages:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/rama5_fusion_despliegue_pages.png" alt="Fusión de Ramas y Despliegue en GitHub Pages">
+      <p class="figure-caption">Figura 5: Diagrama de integración continua desde ramas individuales hacia main y despliegue en GitHub Pages.</p>
+    </div>
+
+    <pre><code># Protocolo de integración segura:
+git checkout main
+git pull origin main
+git merge origin/E_Reyes   # O la rama correspondiente
+git push origin main
+# GitHub Pages publica automáticamente el nuevo contenido en menos de 60 segundos.</code></pre>
+
+    <h2>7. Buenas Prácticas y Prevención de Errores</h2>
+    <div class="callout">
+      <strong>RECOMENDACIONES CLAVE:</strong>
+      <ul>
+        <li>Siempre ejecutar <code>git pull origin main</code> antes de empezar a trabajar.</li>
+        <li>Nunca trabajar directamente en la rama <code>main</code>; realizar los cambios en ramas de integrantes.</li>
+        <li>Si ocurre un bloqueo por <code>index.lock</code> tras un cierre abrupto, eliminarlo con: <code>Remove-Item ".git\index.lock" -Force</code>.</li>
+        <li>Utilizar el botón «Respaldar» de la web para guardar una copia local en formato JSON con todos los archivos PDF.</li>
+      </ul>
+    </div>
+
+    <h2>8. Conclusiones</h2>
+    <div class="success-box">
+      ✔ Repositorio remoto activo en: <strong><a href="https://github.com/pyedgar/portafolio-actividades-tecnicos" target="_blank">pyedgar/portafolio-actividades-tecnicos</a></strong>.<br>
+      ✔ 6 Ramas oficiales configuradas y sincronizadas (<code>main</code>, <code>E_Reyes</code>, <code>F_Gonzalez</code>, <code>K_Andrade</code>, <code>R_Alanis</code>, <code>M_Fuentes</code>).<br>
+      ✔ Sitio web público en vivo en: <strong><a href="https://pyedgar.github.io/portafolio-actividades-tecnicos/" target="_blank">https://pyedgar.github.io/portafolio-actividades-tecnicos/</a></strong>.<br>
+      ✔ Visor interactivo de PDF listo para lectura inmediata en cualquier dispositivo.
+    </div>
+
+    <div class="footer">
+      <p>© 2026 <strong>Los Técnicos</strong> • Universidad Tecnológica de Coahuila • Portafolio General Cursos Lunes</p>
+    </div>
+
+  </div>
+</body>
+</html>
