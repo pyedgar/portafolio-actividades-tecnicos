@@ -38,11 +38,11 @@
     "createdAt": 1791829800000
   },
   {
-    "id": "act-03-reporte-portafolio",
-    "nombre": "Reporte Técnico: Creación y Despliegue del Portafolio en GitHub Pages",
-    "fecha": "2026-10-19 17:40",
-    "descripcion": "Documentación técnica con capturas de pantalla del paso a paso para la inicialización, publicación en GitHub, automatización de GitHub Pages y lectura universal de archivos PDF.",
-    "grupo": "Los Técnicos - UTC (Grupos A y B)",
+    "id": "act-03-repositorio-ramas-integrantes",
+    "nombre": "Actividad 3: Repositorio en GitHub y Subida de Páginas Personales en Ramas por Integrante",
+    "fecha": "2026-10-19 18:30",
+    "descripcion": "Reporte oficial y evidencia técnica de la creación en equipo del repositorio en GitHub, configuración de ramas individuales con nomenclatura NOMBRE_APELLIDO (ej. ALAN_DIAZ) para cada integrante, subida de proyectos personales y fusión ordenada a main.",
+    "grupo": "Los Técnicos - UTC (Cursos Lunes)",
     "integrantes": [
       "Edgar Reyes de la Cruz",
       "Fátima Estefanía González Lozano",
@@ -50,29 +50,10 @@
       "Ramiro Alejandro Alfaro Alanis",
       "Miguel Fuentes Hernández"
     ],
-    "pdfName": "Reporte_Creacion_Portafolio_Actividades_GitHub.pdf",
-    "pdfSize": 709277,
+    "pdfName": "Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
+    "pdfSize": 740124,
     "pdfType": "application/pdf",
-    "pdfUrl": "assets/Reporte_Creacion_Portafolio_Actividades_GitHub.pdf",
-    "createdAt": 1792431600000
-  },
-  {
-    "id": "act-04-guia-ramas-actividades",
-    "nombre": "Reporte Técnico: Creación de Repositorio, Ramas y Subida de Actividades",
-    "fecha": "2026-10-19 18:05",
-    "descripcion": "Guía ilustrada con evidencias de cómo se crea el repositorio, cómo se configuran las ramas de trabajo del equipo y cómo se suben actividades desde la web y mediante Git.",
-    "grupo": "Los Técnicos - UTC (Grupos A y B)",
-    "integrantes": [
-      "Edgar Reyes de la Cruz",
-      "Fátima Estefanía González Lozano",
-      "Kenia Isamara Andrade Cedillo",
-      "Ramiro Alejandro Alfaro Alanis",
-      "Miguel Fuentes Hernández"
-    ],
-    "pdfName": "Reporte_Creacion_Repositorio_Ramas_Actividades.pdf",
-    "pdfSize": 469582,
-    "pdfType": "application/pdf",
-    "pdfUrl": "assets/Reporte_Creacion_Repositorio_Ramas_Actividades.pdf",
-    "createdAt": 1792433100000
+    "pdfUrl": "assets/Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
+    "createdAt": 1792434600000
   }
 ]

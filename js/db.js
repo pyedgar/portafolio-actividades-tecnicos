@@ -3,7 +3,7 @@
  * Garantiza persistencia local y visibilidad universal mediante data/actividades.json
  */
 const DB_NAME = 'PortafolioActividadesDB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_NAME = 'actividades';
 
 class PortfolioDB {
@@ -43,15 +43,21 @@ class PortfolioDB {
   // para que cualquier persona en cualquier equipo las pueda ver inmediatamente
   async syncRepositoryActivities() {
     try {
+      // Eliminar identificadores obsoletos o duplicados anteriores
+      const deprecatedIds = ['act-03-reporte-portafolio', 'act-04-guia-ramas-actividades'];
+      for (const depId of deprecatedIds) {
+        try {
+          const obsolete = await this.getActivity(depId);
+          if (obsolete) await this.deleteActivity(depId);
+        } catch (_) {}
+      }
+
       const response = await fetch('data/actividades.json');
       if (response.ok) {
         const publicActivities = await response.json();
         if (Array.isArray(publicActivities)) {
           for (const act of publicActivities) {
-            const existing = await this.getActivity(act.id);
-            if (!existing) {
-              await this.saveActivity(act);
-            }
+            await this.saveActivity(act);
           }
         }
       }

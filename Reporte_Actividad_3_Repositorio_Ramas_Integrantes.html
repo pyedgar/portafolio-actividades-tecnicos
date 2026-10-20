@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte de Práctica: Actividad 3 - Creación de Repositorio en GitHub y Subida de Páginas Personales en Ramas por Integrante</title>
+  <style>
+    :root {
+      --primary: #1a365d;
+      --secondary: #2b6cb0;
+      --accent: #3182ce;
+      --text: #2d3748;
+      --text-muted: #718096;
+      --bg-card: #f7fafc;
+      --border: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --success-bg: #f0fff4;
+      --success-border: #9ae6b4;
+      --success-text: #22543d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: #f0f4f8;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 50px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-banner {
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 24px;
+      margin-bottom: 30px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #ebf8ff;
+      color: var(--secondary);
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.95rem;
+      color: var(--primary);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 24px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item font { font-size: 0.9rem; }
+    .meta-item strong {
+      display: block;
+      color: var(--primary);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 3px;
+    }
+
+    .instruction-card {
+      background: #eff6ff;
+      border-left: 4px solid var(--accent);
+      padding: 18px 22px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+      color: #1e3a8a;
+    }
+
+    .instruction-card strong {
+      display: block;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      color: var(--primary);
+    }
+
+    h2 {
+      font-size: 1.45rem;
+      color: var(--primary);
+      border-bottom: 2px solid #edf2f7;
+      padding-bottom: 8px;
+      margin: 36px 0 16px;
+    }
+
+    p { margin-bottom: 14px; font-size: 0.98rem; }
+    ul, ol { margin: 12px 0 20px 24px; }
+    li { margin-bottom: 6px; font-size: 0.95rem; }
+
+    pre {
+      background: var(--code-bg);
+      color: #e2e8f0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin: 16px 0 24px;
+    }
+
+    .figure { margin: 28px 0; text-align: center; }
+    .figure img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .figure-caption {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 8px;
+    }
+
+    .table-container { margin: 20px 0; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 10px 14px; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--primary); color: white; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    tr:nth-child(even) { background: #f8fafc; }
+
+    .success-box {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-left: 4px solid #38a169;
+      color: var(--success-text);
+      padding: 16px 20px;
+      border-radius: 6px;
+      margin: 24px 0;
+      font-size: 0.92rem;
+    }
+
+    .footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; padding: 20px 30px; }
+      pre { white-space: pre-wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="header-banner">
+      <div class="badge">Universidad Tecnológica de Coahuila • Portafolio General Cursos Lunes</div>
+      <h1>Reporte de Práctica: Actividad 3 - Creación de Repositorio en GitHub y Subida de Páginas Personales en Ramas por Integrante</h1>
+      <p class="subtitle">Evidencias paso a paso en Visual Studio Code y GitHub de la creación del repositorio grupal, estructuración de ramas individuales (NOMBRE_APELLIDO) y sincronización de proyectos personales.</p>
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Equipo Oficial</strong>
+        Los Técnicos (UTC - Grupos A y B)
+      </div>
+      <div class="meta-item">
+        <strong>Fecha de Publicación</strong>
+        19 de Octubre de 2026
+      </div>
+      <div class="meta-item">
+        <strong>Repositorio en GitHub</strong>
+        <a href="https://github.com/pyedgar/portafolio-actividades-tecnicos" target="_blank">pyedgar/portafolio-actividades-tecnicos</a>
+      </div>
+      <div class="meta-item">
+        <strong>Sitio Web Publicado</strong>
+        <a href="https://pyedgar.github.io/portafolio-actividades-tecnicos/" target="_blank">pyedgar.github.io/portafolio-actividades-tecnicos/</a>
+      </div>
+    </div>
+
+    <div class="instruction-card">
+      <strong>Instrucción Oficial de la Asignación (Actividad 3):</strong>
+      «Realizar en equipo un repositorio en github y subir su proyecto de la página personal cada integrante del equipo en una rama que lleve por nombre su nombre y apellido (ej. ALAN_DIAZ). Después crear un reporte de los pasos realizados para completar esta actividad.»
+    </div>
+
+    <h2>1. Objetivo de la Práctica</h2>
+    <p>El propósito de la <strong>Actividad 3</strong> es dominar el flujo colaborativo de trabajo mediante Git y GitHub, estableciendo un esquema ordenado donde cada estudiante trabaje de forma autónoma en una rama dedicada identificada bajo la convención <code>NOMBRE_APELLIDO</code>. En dicha rama se suben los componentes y recursos de la página personal, integrándose posteriormente hacia la rama de producción <code>main</code>.</p>
+
+    <h2>2. Paso 1: Creación del Repositorio Grupal en GitHub</h2>
+    <p>Se inicializó el repositorio remoto <code>portafolio-actividades-tecnicos</code> bajo el perfil de <code>pyedgar</code> con visibilidad pública. A continuación se presenta la interfaz web oficial de GitHub mostrando las ramas activas del equipo desplegadas:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/captura1_github_repositorio_ramas.png" alt="Repositorio en GitHub con ramas desplegadas">
+      <p class="figure-caption">Captura 1: Vista general del repositorio en GitHub mostrando el menú de ramas activas de los integrantes.</p>
+    </div>
+
+    <pre><code># Inicialización y vinculación remota:
+git init
+git add .
+git commit -m "feat: Inicializar repositorio grupal Los Tecnicos"
+git branch -M main
+git remote add origin https://github.com/pyedgar/portafolio-actividades-tecnicos.git
+git push -u origin main</code></pre>
+
+    <h2>3. Paso 2: Creación de la Rama Personal de Trabajo en Visual Studio Code</h2>
+    <p>Cumpliendo la instrucción <em>«en una rama que lleve por nombre su nombre y apellido (ej. ALAN_DIAZ)»</em>, cada alumno abrió su proyecto en <strong>Visual Studio Code</strong> y creó su rama individual mediante la terminal integrada:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/captura2_vscode_rama_personal.png" alt="Creación de rama en Visual Studio Code">
+      <p class="figure-caption">Captura 2: Visual Studio Code mostrando la creación de la rama EDGAR_REYES en la terminal y el código de la página personal.</p>
+    </div>
+
+    <ul>
+      <li><strong>Comando:</strong> <code>git checkout -b EDGAR_REYES</code> genera la rama y realiza la conmutación inmediata.</li>
+      <li><strong>Barra de Estado:</strong> En el borde inferior izquierdo de VS Code se aprecia la etiqueta azul confirmando que la rama activa es <code>EDGAR_REYES*</code>.</li>
+      <li><strong>Archivos:</strong> Los componentes de la página personal (<code>edgar.html</code>, <code>edgar.css</code>, <code>edgar.ts</code>) quedan aislados en su rama de desarrollo.</li>
+    </ul>
+
+    <h2>4. Paso 3: Subida del Proyecto Personal a GitHub con Git Push</h2>
+    <p>Con los cambios guardados, se agregaron los archivos de la página personal, se creó el commit formal y se realizó el envío remoto a GitHub vinculando la rama remota:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/captura3_vscode_git_push.png" alt="Git push en terminal de Visual Studio Code">
+      <p class="figure-caption">Captura 3: Terminal integrada de Visual Studio Code ejecutando git commit y git push hacia la rama remota en GitHub.</p>
+    </div>
+
+    <pre><code># Comandos ejecutados en la terminal de Visual Studio Code:
+git add src/app/componentes/edgar/
+git commit -m "Actividad 3: Subir proyecto de pagina personal de Edgar Reyes en rama EDGAR_REYES"
+git push -u origin EDGAR_REYES</code></pre>
+
+    <h2>5. Paso 4: Verificación de Ramas de Integrantes en GitHub</h2>
+    <p>En el panel oficial de <strong>Branches</strong> de GitHub, se visualiza el registro de todas las ramas individuales creadas por los miembros del equipo Los Técnicos:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/captura4_github_branches_overview.png" alt="Panel de Ramas en GitHub">
+      <p class="figure-caption">Captura 4: Panel oficial de ramas en GitHub listando las ramas creadas por cada integrante del equipo Los Técnicos.</p>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Rama Oficial Asignada</th>
+            <th>Integrante del Equipo</th>
+            <th>Proyecto de Página Personal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>EDGAR_REYES</strong></td>
+            <td>Edgar Reyes de la Cruz</td>
+            <td>Página personal y calculadora técnica</td>
+          </tr>
+          <tr>
+            <td><strong>FATIMA_GONZALEZ</strong></td>
+            <td>Fátima Estefanía González Lozano</td>
+            <td>Página personal y portafolio de evidencias</td>
+          </tr>
+          <tr>
+            <td><strong>KENIA_ANDRADE</strong></td>
+            <td>Kenia Isamara Andrade Cedillo</td>
+            <td>Página personal y calculadora técnica</td>
+          </tr>
+          <tr>
+            <td><strong>RAMIRO_ALFARO</strong></td>
+            <td>Ramiro Alejandro Alfaro Alanis</td>
+            <td>Página personal y calculadora técnica</td>
+          </tr>
+          <tr>
+            <td><strong>MIGUEL_FUENTES</strong></td>
+            <td>Miguel Fuentes Hernández</td>
+            <td>Página personal y componentes de presentación</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>6. Paso 5: Fusión de Ramas (Merge) hacia la Rama Principal Main</h2>
+    <p>Para consolidar todas las páginas en el portafolio grupal y que queden publicadas en Internet en GitHub Pages, se integraron los cambios con una fusión Fast-Forward sin colisiones:</p>
+
+    <div class="figure">
+      <img src="capturas_reporte_portafolio/captura5_vscode_merge_ramas.png" alt="Fusión de ramas en Visual Studio Code">
+      <p class="figure-caption">Captura 5: Visual Studio Code mostrando la integración de la rama mediante Fast-Forward merge hacia main.</p>
+    </div>
+
+    <pre><code># Protocolo de integración hacia main:
+git checkout main
+git pull origin main
+git merge origin/EDGAR_REYES
+git push origin main</code></pre>
+
+    <h2>7. Buenas Prácticas</h2>
+    <ul>
+      <li><strong>Nomenclatura uniforme:</strong> Respetar el formato <code>NOMBRE_APELLIDO</code> asegura uniformidad institucional.</li>
+      <li><strong>Sincronización continua:</strong> Ejecutar <code>git pull origin main</code> antes de iniciar cualquier cambio local.</li>
+      <li><strong>Commits descriptivos:</strong> Detallar en el mensaje el archivo y la actividad que se está subiendo.</li>
+    </ul>
+
+    <h2>8. Conclusiones</h2>
+    <div class="success-box">
+      <p><strong>✔ ACTIVIDAD 3 COMPLETADA AL 100%:</strong></p>
+      <ul>
+        <li>Repositorio grupal creado y publicado en GitHub.</li>
+        <li>Ramas personales creadas bajo el formato <code>NOMBRE_APELLIDO</code> (EDGAR_REYES, FATIMA_GONZALEZ, KENIA_ANDRADE, RAMIRO_ALFARO, MIGUEL_FUENTES).</li>
+        <li>Proyectos de páginas personales subidos con Git a sus ramas correspondientes.</li>
+        <li>Fusión controlada hacia la rama principal <code>main</code>.</li>
+        <li>Reporte técnico con capturas de pantalla de Visual Studio Code y GitHub.</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <p>© 2026 <strong>Los Técnicos</strong> • Universidad Tecnológica de Coahuila • Cursos Lunes</p>
+      <p>Repositorio: <a href="https://github.com/pyedgar/portafolio-actividades-tecnicos" target="_blank">https://github.com/pyedgar/portafolio-actividades-tecnicos</a></p>
+    </div>
+
+  </div>
+</body>
+</html>
