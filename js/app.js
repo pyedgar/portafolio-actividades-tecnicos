@@ -335,12 +335,21 @@ async function handleFormSubmit(e) {
     };
 
     await window.portfolioDB.saveActivity(newActivity);
+
+    // Inmediatamente insertar en allActivities para feedback visual instantáneo
+    if (!allActivities.some(a => a.id === newActivity.id)) {
+      allActivities.unshift(newActivity);
+    }
+    updateStats();
+    updateFilterDropdowns();
+    filterActivities();
+
     showToast('¡Actividad y archivo PDF guardados correctamente!', 'success');
     closeCreateModal();
     await loadAndRenderActivities();
   } catch (error) {
     console.error('Error al guardar actividad:', error);
-    showToast('Ocurrió un error al guardar la actividad en la base de datos.', 'danger');
+    showToast('Ocurrió un error al guardar la actividad.', 'danger');
   }
 }
 
