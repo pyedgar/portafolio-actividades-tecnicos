@@ -1,5 +1,5 @@
 /**
- * Base de datos universal y gestor de actividades
+ * Base de datos universal y gestor de actividades con sincronización Firebase en la nube
  * Catálogo Oficial con las 6 actividades organizadas en la carpeta actividades_pdf
  */
 
@@ -205,6 +205,21 @@ class PortfolioDB {
       }
     } catch (_) {}
 
+    // Sincronizar con Firebase Cloud Firestore si está disponible
+    if (window.firebaseService && window.firebaseService.isAvailable()) {
+      try {
+        const cloudItems = await window.firebaseService.fetchActivities();
+        cloudItems.forEach(act => {
+          if (!DEPRECATED_IDS.includes(act.id)) {
+            map.set(act.id, act);
+            this.memoryStore.set(act.id, act);
+          }
+        });
+      } catch (fbErr) {
+        console.warn('No se pudo sincronizar Firestore en getAllActivities:', fbErr);
+      }
+    }
+
     const list = Array.from(map.values());
     list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     return list;
@@ -241,6 +256,25 @@ class PortfolioDB {
   async saveActivity(activity) {
     this.memoryStore.set(activity.id, activity);
 
+    // 1. Si Firebase está activo y se adjuntó un archivo PDF, subirlo a Firebase Storage
+    if (window.firebaseService && window.firebaseService.isAvailable()) {
+      try {
+        if (activity.pdfBlob instanceof Blob && (!activity.pdfUrl || activity.pdfUrl.startsWith('blob:'))) {
+          const cloudPdfUrl = await window.firebaseService.uploadPdf(activity.pdfBlob, activity.id);
+          if (cloudPdfUrl) {
+            activity.pdfUrl = cloudPdfUrl;
+            console.log('✅ PDF subido exitosamente a Firebase Storage:', cloudPdfUrl);
+          }
+        }
+        // Guardar metadata en Cloud Firestore
+        await window.firebaseService.saveActivity(activity);
+        console.log('✅ Actividad guardada en Cloud Firestore');
+      } catch (fbErr) {
+        console.warn('⚠️ Fallo guardado en Firebase, conservando en almacenamiento local:', fbErr);
+      }
+    }
+
+    // 2. Guardar en IndexedDB local
     try {
       const db = await this.init();
       if (db) {
@@ -275,6 +309,16 @@ class PortfolioDB {
   async deleteActivity(id) {
     this.memoryStore.delete(id);
 
+    // Eliminar de Firebase si está conectado
+    if (window.firebaseService && window.firebaseService.isAvailable()) {
+      try {
+        await window.firebaseService.deleteActivity(id);
+      } catch (fbErr) {
+        console.warn('Error al eliminar de Firebase:', fbErr);
+      }
+    }
+
+    // Eliminar de IndexedDB local
     try {
       const db = await this.init();
       if (db) {

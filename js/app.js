@@ -1,5 +1,5 @@
 /**
- * Aplicación de Portafolio de Actividades con Visor de PDF
+ * Aplicación de Portafolio de Actividades con Visor de PDF y Sincronización en la Nube
  * Integrantes oficiales del equipo Los Técnicos (Cursos Lunes - UTC)
  */
 
@@ -85,8 +85,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderMemberCheckboxes();
   setupEventListeners();
   setDefaultDateTime();
+  updateCloudBadge();
   await loadAndRenderActivities();
+
+  // Escuchar sincronización en tiempo real desde Firebase
+  if (window.firebaseService && window.firebaseService.isAvailable()) {
+    window.firebaseService.onActivitiesChanged(async (cloudList) => {
+      console.log('🔄 Sincronización en tiempo real desde Firebase:', cloudList.length);
+      await loadAndRenderActivities();
+    });
+  }
 });
+
+// Actualizar indicador de estado de la nube
+function updateCloudBadge() {
+  const badge = document.getElementById('cloudStatusBadge');
+  const text = document.getElementById('cloudStatusText');
+  if (!badge || !text) return;
+
+  if (window.firebaseService && window.firebaseService.isAvailable()) {
+    badge.className = 'cloud-status-badge';
+    badge.innerHTML = '<i class="fa-solid fa-cloud"></i> <span>Firebase Conectado</span>';
+    badge.title = 'Conectado a Firebase: sincronización en la nube activa';
+  } else {
+    badge.className = 'cloud-status-badge offline';
+    badge.innerHTML = '<i class="fa-solid fa-hard-drive"></i> <span>Modo Local (IndexedDB)</span>';
+    badge.title = 'Guardando en almacenamiento local del navegador';
+  }
+}
 
 // Renderizar badges en el banner principal
 function renderTeamChips() {
@@ -132,10 +158,10 @@ function setupEventListeners() {
     if (e.target === dom.modalCreateActivity) closeCreateModal();
   });
 
-  // Botón para actualizar a fecha y hora actual
+  // Botón ahora para la fecha
   dom.btnNowDate.addEventListener('click', () => {
     setDefaultDateTime();
-    showToast('Fecha y hora sincronizadas al momento actual', 'info');
+    showToast('Fecha y hora actualizadas al momento actual.', 'info');
   });
 
   // Acciones rápidas de integrantes
@@ -147,7 +173,7 @@ function setupEventListeners() {
     dom.membersCheckboxContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
   });
 
-  // Agregar integrante adicional manual
+  // Añadir integrante extra
   dom.btnAddExtraMember.addEventListener('click', addExtraMember);
   dom.extraMemberInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
@@ -163,37 +189,34 @@ function setupEventListeners() {
   });
 
   dom.pdfFileInput.addEventListener('change', (e) => {
-    if (e.target.files && e.target.files[0]) {
-      handleSelectedPdf(e.target.files[0]);
-    }
+    const file = e.target.files && e.target.files[0];
+    if (file) handleSelectedPdf(file);
   });
 
   // Drag and Drop
   ['dragenter', 'dragover'].forEach(eventName => {
     dom.pdfDropzone.addEventListener(eventName, (e) => {
       e.preventDefault();
-      dom.pdfDropzone.classList.add('dragover');
+      e.stopPropagation();
+      dom.pdfDropzone.classList.add('drag-over');
     });
   });
 
   ['dragleave', 'drop'].forEach(eventName => {
     dom.pdfDropzone.addEventListener(eventName, (e) => {
       e.preventDefault();
-      dom.pdfDropzone.classList.remove('dragover');
+      e.stopPropagation();
+      dom.pdfDropzone.classList.remove('drag-over');
     });
   });
 
   dom.pdfDropzone.addEventListener('drop', (e) => {
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-        handleSelectedPdf(file);
-      } else {
-        showToast('Por favor, selecciona un archivo en formato PDF.', 'danger');
-      }
-    }
+    const dt = e.dataTransfer;
+    const file = dt.files && dt.files[0];
+    if (file) handleSelectedPdf(file);
   });
 
+  // Quitar archivo PDF
   dom.btnRemovePdf.addEventListener('click', (e) => {
     e.stopPropagation();
     selectedPdfFile = null;
@@ -316,7 +339,15 @@ async function handleFormSubmit(e) {
     return;
   }
 
+  const submitBtn = dom.activityForm.querySelector('button[type="submit"]');
+  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
   try {
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando en la nube...';
+    }
+
     const formattedDate = formatDateTimeInput(fechaVal);
 
     const newActivity = {
@@ -350,6 +381,11 @@ async function handleFormSubmit(e) {
   } catch (error) {
     console.error('Error al guardar actividad:', error);
     showToast('Ocurrió un error al guardar la actividad.', 'danger');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+    }
   }
 }
 
@@ -378,23 +414,22 @@ function updateStats() {
   dom.statTotalActivities.textContent = allActivities.length;
   dom.statTotalPdfs.textContent = allActivities.filter(a => a.pdfName || a.pdfBlob || a.pdfUrl).length;
 
-  const uniqueMembers = new Set();
-  OFFICIAL_MEMBERS.forEach(m => uniqueMembers.add(m));
+  const allMembersSet = new Set(OFFICIAL_MEMBERS);
   allActivities.forEach(a => {
-    (a.integrantes || []).forEach(m => uniqueMembers.add(m));
+    if (Array.isArray(a.integrantes)) {
+      a.integrantes.forEach(m => allMembersSet.add(m));
+    }
   });
-  dom.statTotalMembers.textContent = uniqueMembers.size;
+  dom.statTotalMembers.textContent = allMembersSet.size;
 }
 
-// Actualizar opciones de los filtros
+// Actualizar opciones de los desplegables de filtro
 function updateFilterDropdowns() {
   const currentGroup = dom.filterGroup.value;
   const currentMember = dom.filterMember.value;
 
   const groups = new Set();
   const members = new Set();
-
-  OFFICIAL_MEMBERS.forEach(m => members.add(m));
 
   allActivities.forEach(a => {
     if (a.grupo) groups.add(a.grupo);

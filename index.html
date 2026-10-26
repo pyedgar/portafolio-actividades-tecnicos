@@ -31,6 +31,10 @@
       </div>
 
       <div class="nav-actions">
+        <div class="cloud-status-badge" id="cloudStatusBadge" title="Estado de sincronización en Firebase">
+          <i class="fa-solid fa-cloud"></i>
+          <span id="cloudStatusText">Firebase Conectado</span>
+        </div>
         <button id="btnBackup" class="btn btn-secondary" title="Exportar o respaldar actividades">
           <i class="fa-solid fa-download"></i>
           <span>Respaldar</span>
@@ -359,12 +363,19 @@
     <div class="container footer-content">
       <p>© 2026 <strong>Los Técnicos</strong> • Portafolio de Actividades de Cursos Lunes • Universidad Tecnológica de Coahuila</p>
       <p class="footer-links">
-        <span><i class="fa-brands fa-github"></i> Listo para GitHub Pages</span>
+        <span><i class="fa-brands fa-github"></i> GitHub Pages</span>
+        <span>•</span>
+        <span><i class="fa-solid fa-cloud text-emerald"></i> Firebase Cloud</span>
       </p>
     </div>
   </footer>
 
-  <script src="js/db.js?v=20261019_1930"></script>
-  <script src="js/app.js?v=20261019_1930"></script>
+  <!-- Firebase SDK (Compat v10) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js?v=20261025"></script>
+  <script src="js/db.js?v=20261025"></script>
+  <script src="js/app.js?v=20261025"></script>
 </body>
 </html>
