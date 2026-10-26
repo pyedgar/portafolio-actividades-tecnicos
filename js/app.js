@@ -129,6 +129,7 @@ function isMobileDevice() {
 document.addEventListener('DOMContentLoaded', async () => {
   setupAnimeVideoControls();
   setupAnimeCoverSelector();
+  setupOtakuRadio();
   renderTeamChips();
   renderMemberCheckboxes();
   setupEventListeners();
@@ -145,34 +146,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Control del Video Anime de Fondo (Pausa/Reanudar y Audio)
+// Control del Video Anime Vertical y Ambiente (Pausa/Reanudar y Audio)
 function setupAnimeVideoControls() {
   const bgVideo = document.getElementById('bgVideo');
+  const bgVideoAmbient = document.getElementById('bgVideoAmbient');
   const btnToggleVideoPlay = document.getElementById('btnToggleVideoPlay');
   const btnToggleVideoAudio = document.getElementById('btnToggleVideoAudio');
 
   if (!bgVideo) return;
 
+  const playVideos = () => {
+    bgVideo.play().catch(() => {});
+    if (bgVideoAmbient) bgVideoAmbient.play().catch(() => {});
+  };
+
+  const pauseVideos = () => {
+    bgVideo.pause();
+    if (bgVideoAmbient) bgVideoAmbient.pause();
+  };
+
   // Autoplay silencioso con reintento si el navegador restringe
   const attemptPlay = () => {
-    bgVideo.play().catch(() => {
-      window.addEventListener('click', () => {
-        bgVideo.play().catch(() => {});
-      }, { once: true });
-    });
+    playVideos();
+    window.addEventListener('click', () => {
+      playVideos();
+    }, { once: true });
   };
   attemptPlay();
 
   if (btnToggleVideoPlay) {
     btnToggleVideoPlay.addEventListener('click', () => {
       if (bgVideo.paused) {
-        bgVideo.play();
+        playVideos();
         btnToggleVideoPlay.innerHTML = '<i class="fa-solid fa-pause"></i>';
-        btnToggleVideoPlay.title = 'Pausar video anime';
+        btnToggleVideoPlay.title = 'Pausar video anime vertical';
       } else {
-        bgVideo.pause();
+        pauseVideos();
         btnToggleVideoPlay.innerHTML = '<i class="fa-solid fa-play"></i>';
-        btnToggleVideoPlay.title = 'Reproducir video anime';
+        btnToggleVideoPlay.title = 'Reproducir video anime vertical';
       }
     });
   }
@@ -182,15 +193,313 @@ function setupAnimeVideoControls() {
       bgVideo.muted = !bgVideo.muted;
       if (bgVideo.muted) {
         btnToggleVideoAudio.classList.remove('active-sound');
-        btnToggleVideoAudio.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> <span class="btn-label-mobile-hide">Audio</span>';
+        btnToggleVideoAudio.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> <span class="btn-label-mobile-hide">Audio BG</span>';
         showToast('Audio de fondo silenciado.', 'info');
       } else {
         btnToggleVideoAudio.classList.add('active-sound');
-        btnToggleVideoAudio.innerHTML = '<i class="fa-solid fa-volume-high"></i> <span class="btn-label-mobile-hide">Sonido ON</span>';
+        btnToggleVideoAudio.innerHTML = '<i class="fa-solid fa-volume-high"></i> <span class="btn-label-mobile-hide">Audio ON</span>';
         showToast('¡Audio de fondo activado!', 'success');
       }
     });
   }
+}
+
+// =========================================================
+// RADIO OTAKU CLÁSICA & TRANQUI (REPRODUCTOR DE MÚSICA ANIME)
+// =========================================================
+const OTAKU_RADIO_PLAYLIST = [
+  {
+    title: "Spirited Away - One Summer's Day",
+    artist: "Studio Ghibli / Joe Hisaishi (Lo-Fi Chill)",
+    badge: "GHIBLI CLÁSICO TRANQUI",
+    cover: "assets/images/anime/anime_pin_1.jpg",
+    url: "assets/audio/03_spirited_away_lofi.mp3",
+    isLive: false
+  },
+  {
+    title: "My Neighbor Totoro - Wind Path",
+    artist: "Studio Ghibli (Piano Chill Vibes)",
+    badge: "PIANO CLÁSICO TRANQUI",
+    cover: "assets/images/anime/anime_pin_2.png",
+    url: "assets/audio/01_totoro_ghibli_chill.mp3",
+    isLive: false
+  },
+  {
+    title: "Princess Mononoke - Ashitaka Theme",
+    artist: "Studio Ghibli / Joe Hisaishi (Relax)",
+    badge: "ORQUESTA & CHILL",
+    cover: "assets/images/anime/anime_neon_samurai.jpg",
+    url: "assets/audio/02_princess_mononoke_chill.mp3",
+    isLive: false
+  },
+  {
+    title: "LISTEN.moe Anime Radio Live",
+    artist: "J-Pop & Anime Soundtracks 24/7",
+    badge: "RADIO EN VIVO 24/7",
+    cover: "assets/images/anime/anime_neon_cyberpunk_pink.jpg",
+    url: "https://listen.moe/stream",
+    isLive: true
+  },
+  {
+    title: "Anime Chillhop & Groove",
+    artist: "Future Funk & Anime Beats",
+    badge: "RADIO EN VIVO 24/7",
+    cover: "assets/images/anime/anime_neon_gojo_purple.jpg",
+    url: "https://radio.yumi.moe/stream/1/",
+    isLive: true
+  }
+];
+
+let currentRadioTrackIndex = 0;
+let isRadioPlaying = false;
+
+function setupOtakuRadio() {
+  const audio = document.getElementById('otakuAudioElement');
+  const widget = document.getElementById('otakuRadioWidget');
+  const btnToggleRadioPill = document.getElementById('btnToggleRadioPill');
+  const btnFloatingRadioTrigger = document.getElementById('btnFloatingRadioTrigger');
+  const btnCloseRadioWidget = document.getElementById('btnCloseRadioWidget');
+  const btnMinimizeRadio = document.getElementById('btnMinimizeRadio');
+  const iconMinimizeRadio = document.getElementById('iconMinimizeRadio');
+
+  const btnPlayPause = document.getElementById('btnRadioPlayPause');
+  const iconPlayPause = document.getElementById('iconRadioPlayPause');
+  const btnPrev = document.getElementById('btnRadioPrev');
+  const btnNext = document.getElementById('btnRadioNext');
+  const btnMute = document.getElementById('btnRadioMute');
+  const iconMute = document.getElementById('iconRadioMute');
+  const volumeSlider = document.getElementById('radioVolumeSlider');
+  const stationSelect = document.getElementById('radioStationSelect');
+
+  const trackTitle = document.getElementById('radioTrackTitle');
+  const trackArtist = document.getElementById('radioTrackArtist');
+  const trackBadge = document.getElementById('radioStationBadge');
+  const trackCover = document.getElementById('radioTrackCover');
+  const coverWrap = document.querySelector('.track-cover-art');
+  const eqBars = document.getElementById('radioEqBars');
+  const liveDot = document.getElementById('radioLiveDot');
+
+  const progressBar = document.getElementById('radioProgressBar');
+  const progressFill = document.getElementById('radioProgressFill');
+  const currentTimeLabel = document.getElementById('radioCurrentTime');
+  const totalTimeLabel = document.getElementById('radioTotalTime');
+
+  if (!audio || !widget) return;
+
+  function loadTrack(index, autoPlay = false) {
+    currentRadioTrackIndex = (index + OTAKU_RADIO_PLAYLIST.length) % OTAKU_RADIO_PLAYLIST.length;
+    const track = OTAKU_RADIO_PLAYLIST[currentRadioTrackIndex];
+
+    audio.src = track.url;
+    audio.load();
+
+    if (trackTitle) trackTitle.textContent = track.title;
+    if (trackArtist) trackArtist.textContent = track.artist;
+    if (trackBadge) trackBadge.textContent = track.badge;
+    if (trackCover) trackCover.src = track.cover;
+    if (stationSelect) stationSelect.value = currentRadioTrackIndex;
+
+    progressFill.style.width = '0%';
+    currentTimeLabel.textContent = '0:00';
+    totalTimeLabel.textContent = track.isLive ? 'EN VIVO' : '--:--';
+
+    if (autoPlay) {
+      playRadio();
+    }
+  }
+
+  function playRadio() {
+    audio.play().then(() => {
+      isRadioPlaying = true;
+      updateRadioUI(true);
+    }).catch(err => {
+      console.warn('Reproducción de audio bloqueada o en espera de interacción:', err);
+    });
+  }
+
+  function pauseRadio() {
+    audio.pause();
+    isRadioPlaying = false;
+    updateRadioUI(false);
+  }
+
+  function updateRadioUI(playing) {
+    if (iconPlayPause) {
+      iconPlayPause.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+    }
+    if (eqBars) {
+      eqBars.classList.toggle('playing', playing);
+    }
+    if (coverWrap) {
+      coverWrap.classList.toggle('playing', playing);
+    }
+    if (btnFloatingRadioTrigger) {
+      btnFloatingRadioTrigger.classList.toggle('playing', playing);
+    }
+    if (liveDot) {
+      liveDot.style.background = playing ? '#ff2a85' : '#10b981';
+      liveDot.style.boxShadow = playing ? '0 0 10px #ff2a85' : '0 0 8px #10b981';
+    }
+  }
+
+  // Cargar primera canción
+  loadTrack(0, false);
+
+  // Botón Play / Pause
+  if (btnPlayPause) {
+    btnPlayPause.addEventListener('click', () => {
+      if (isRadioPlaying) {
+        pauseRadio();
+      } else {
+        playRadio();
+      }
+    });
+  }
+
+  // Siguiente y Anterior
+  if (btnNext) {
+    btnNext.addEventListener('click', () => {
+      loadTrack(currentRadioTrackIndex + 1, isRadioPlaying);
+    });
+  }
+
+  if (btnPrev) {
+    btnPrev.addEventListener('click', () => {
+      loadTrack(currentRadioTrackIndex - 1, isRadioPlaying);
+    });
+  }
+
+  // Cambio desde select
+  if (stationSelect) {
+    stationSelect.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      loadTrack(idx, true);
+    });
+  }
+
+  // Actualización de tiempo y barra de progreso
+  audio.addEventListener('timeupdate', () => {
+    const track = OTAKU_RADIO_PLAYLIST[currentRadioTrackIndex];
+    if (track.isLive) {
+      progressFill.style.width = '100%';
+      currentTimeLabel.textContent = 'LIVE';
+      totalTimeLabel.textContent = '24/7';
+      return;
+    }
+    if (audio.duration) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = pct + '%';
+      currentTimeLabel.textContent = formatAudioTime(audio.currentTime);
+      totalTimeLabel.textContent = formatAudioTime(audio.duration);
+    }
+  });
+
+  audio.addEventListener('ended', () => {
+    // Pasar a la siguiente canción automáticamente
+    loadTrack(currentRadioTrackIndex + 1, true);
+  });
+
+  // Clic en la barra de progreso para adelantar/retroceder
+  if (progressBar) {
+    progressBar.addEventListener('click', (e) => {
+      const track = OTAKU_RADIO_PLAYLIST[currentRadioTrackIndex];
+      if (track.isLive) return;
+      const rect = progressBar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      if (audio.duration) {
+        audio.currentTime = pos * audio.duration;
+      }
+    });
+  }
+
+  // Control de volumen
+  if (volumeSlider) {
+    audio.volume = parseFloat(volumeSlider.value);
+    volumeSlider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      audio.volume = val;
+      audio.muted = (val === 0);
+      if (iconMute) {
+        iconMute.className = val === 0 ? 'fa-solid fa-volume-xmark' : (val < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high');
+      }
+    });
+  }
+
+  // Botón silenciar
+  if (btnMute) {
+    btnMute.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+      if (iconMute) {
+        iconMute.className = audio.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+      }
+      if (!audio.muted && volumeSlider && volumeSlider.value === '0') {
+        volumeSlider.value = '0.5';
+        audio.volume = 0.5;
+      }
+    });
+  }
+
+  // Minimizar / Expandir widget
+  function toggleMinimize() {
+    widget.classList.toggle('minimized');
+    const isMin = widget.classList.contains('minimized');
+    if (iconMinimizeRadio) {
+      iconMinimizeRadio.className = isMin ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
+    }
+  }
+
+  if (btnMinimizeRadio) {
+    btnMinimizeRadio.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMinimize();
+    });
+  }
+
+  // Cerrar y ocultar hacia el botón flotante
+  function closeWidget() {
+    widget.style.display = 'none';
+    if (btnFloatingRadioTrigger) {
+      btnFloatingRadioTrigger.style.display = 'flex';
+    }
+  }
+
+  function openWidget() {
+    widget.style.display = 'block';
+    if (btnFloatingRadioTrigger) {
+      btnFloatingRadioTrigger.style.display = 'none';
+    }
+  }
+
+  if (btnCloseRadioWidget) {
+    btnCloseRadioWidget.addEventListener('click', closeWidget);
+  }
+
+  if (btnFloatingRadioTrigger) {
+    btnFloatingRadioTrigger.addEventListener('click', openWidget);
+  }
+
+  if (btnToggleRadioPill) {
+    btnToggleRadioPill.addEventListener('click', () => {
+      if (widget.style.display === 'none') {
+        openWidget();
+        if (!isRadioPlaying) playRadio();
+      } else {
+        if (widget.classList.contains('minimized')) {
+          widget.classList.remove('minimized');
+          if (iconMinimizeRadio) iconMinimizeRadio.className = 'fa-solid fa-chevron-down';
+        } else {
+          closeWidget();
+        }
+      }
+    });
+  }
+}
+
+function formatAudioTime(seconds) {
+  if (isNaN(seconds)) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
 // Selector visual de portadas anime en el formulario de creación

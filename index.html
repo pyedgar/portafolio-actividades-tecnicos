@@ -13,16 +13,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=20261025_anime">
+  <link rel="stylesheet" href="css/styles.css?v=20261026_vertical_radio">
 </head>
 <body class="anime-theme">
 
-  <!-- Fondo de Video Anime Oficial (Samurai Live Wallpaper Pinterest https://pin.it/55IbeUJIz) -->
+  <!-- Fondo de Video Anime Oficial (Vertical 9:16 Pinterest https://pin.it/55IbeUJIz) -->
   <div class="anime-video-bg-container" id="animeVideoContainer">
-    <video id="bgVideo" autoplay muted loop playsinline preload="auto" poster="assets/images/anime/anime_neon_samurai.jpg">
+    <!-- Video de fondo difuminado ambiental para rellenar laterales en pantallas horizontales -->
+    <video id="bgVideoAmbient" class="anime-video-ambient" autoplay muted loop playsinline preload="auto">
       <source src="assets/videos/anime_background.mp4" type="video/mp4">
       <source src="https://v1.pinimg.com/videos/iht/expMp4/ea/51/3c/ea513c1c0442eba57b4cb8c78f5dc960_720w.mp4" type="video/mp4">
     </video>
+
+    <!-- Video principal VERTICAL auténtico (formato vertical 9:16 completo, visible de cabeza a espada y luna) -->
+    <div class="anime-video-vertical-wrapper">
+      <video id="bgVideo" class="anime-video-vertical" autoplay muted loop playsinline preload="auto" poster="assets/images/anime/anime_neon_samurai.jpg">
+        <source src="assets/videos/anime_background.mp4" type="video/mp4">
+        <source src="https://v1.pinimg.com/videos/iht/expMp4/ea/51/3c/ea513c1c0442eba57b4cb8c78f5dc960_720w.mp4" type="video/mp4">
+      </video>
+      <div class="anime-vertical-glow-border"></div>
+    </div>
+
+    <!-- Overlay transparente calibrado para máxima visibilidad del samurái vertical -->
     <div class="anime-video-overlay"></div>
     <div class="anime-cyber-scanlines"></div>
   </div>
@@ -44,14 +56,21 @@
       </div>
 
       <div class="nav-actions">
+        <!-- Radio Otaku Tranqui (Acceso Directo Navbar) -->
+        <button id="btnToggleRadioPill" class="btn btn-anime-radio" title="Abrir / Ocultar Radio Otaku Clásica & Tranqui">
+          <i class="fa-solid fa-radio"></i>
+          <span>Radio Otaku</span>
+          <span class="radio-live-dot" id="radioLiveDot"></span>
+        </button>
+
         <!-- Controles de Video Anime de Fondo -->
-        <div class="video-media-controls" title="Control del Video Anime de Fondo">
-          <button id="btnToggleVideoPlay" class="btn btn-anime-video" title="Pausar / Reproducir video anime">
+        <div class="video-media-controls" title="Control del Video Anime Vertical">
+          <button id="btnToggleVideoPlay" class="btn btn-anime-video" title="Pausar / Reproducir video vertical">
             <i class="fa-solid fa-pause"></i>
           </button>
           <button id="btnToggleVideoAudio" class="btn btn-anime-video" title="Activar / Silenciar audio del video anime">
             <i class="fa-solid fa-volume-xmark"></i>
-            <span class="btn-label-mobile-hide">Audio</span>
+            <span class="btn-label-mobile-hide">Audio BG</span>
           </button>
         </div>
 
@@ -466,6 +485,99 @@
     </div>
   </div>
 
+  <!-- Widget Flotante: Radio Otaku Clásica & Tranqui (アニメ・チルラジオ) -->
+  <aside class="otaku-radio-widget" id="otakuRadioWidget" aria-label="Radio Otaku Clásica y Tranqui">
+    <div class="radio-widget-header" id="radioWidgetHeader">
+      <div class="radio-header-info">
+        <div class="radio-eq-bars" id="radioEqBars">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div>
+          <h4>Radio Otaku Tranqui</h4>
+          <span class="radio-subtext">クラシック・チル // ANIME CLASSICS</span>
+        </div>
+      </div>
+      <div class="radio-header-btns">
+        <button id="btnMinimizeRadio" class="btn-radio-tool" title="Minimizar / Expandir radio">
+          <i class="fa-solid fa-chevron-down" id="iconMinimizeRadio"></i>
+        </button>
+        <button id="btnCloseRadioWidget" class="btn-radio-tool" title="Cerrar widget de radio">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="radio-widget-body" id="radioWidgetBody">
+      <div class="radio-current-track">
+        <div class="track-cover-art">
+          <img id="radioTrackCover" src="assets/images/anime/anime_pin_1.jpg" alt="Track Cover">
+          <div class="track-vinyl-glow"></div>
+        </div>
+        <div class="track-details">
+          <div class="track-title-ticker">
+            <span id="radioTrackTitle" class="track-title">Spirited Away - One Summer's Day</span>
+          </div>
+          <span id="radioTrackArtist" class="track-artist">Studio Ghibli / Joe Hisaishi (Lo-Fi Chill)</span>
+          <span id="radioStationBadge" class="station-badge">CANAL CLÁSICO TRANQUI</span>
+        </div>
+      </div>
+
+      <!-- Barra de progreso / tiempo -->
+      <div class="radio-progress-wrap" id="radioProgressWrap">
+        <div class="radio-progress-bar" id="radioProgressBar">
+          <div class="radio-progress-fill" id="radioProgressFill"></div>
+        </div>
+        <div class="radio-time-row">
+          <span id="radioCurrentTime">0:00</span>
+          <span id="radioTotalTime">3:12</span>
+        </div>
+      </div>
+
+      <!-- Controles de la Radio -->
+      <div class="radio-controls-row">
+        <button id="btnRadioPrev" class="btn-radio-ctrl" title="Canción / Estación anterior">
+          <i class="fa-solid fa-backward-step"></i>
+        </button>
+        <button id="btnRadioPlayPause" class="btn-radio-play" title="Reproducir / Pausar">
+          <i class="fa-solid fa-play" id="iconRadioPlayPause"></i>
+        </button>
+        <button id="btnRadioNext" class="btn-radio-ctrl" title="Siguiente canción / estación">
+          <i class="fa-solid fa-forward-step"></i>
+        </button>
+        <div class="radio-volume-wrap">
+          <button id="btnRadioMute" class="btn-radio-ctrl" title="Silenciar / Activar volumen">
+            <i class="fa-solid fa-volume-high" id="iconRadioMute"></i>
+          </button>
+          <input type="range" id="radioVolumeSlider" min="0" max="1" step="0.05" value="0.75" class="radio-vol-slider" title="Ajustar volumen">
+        </div>
+      </div>
+
+      <!-- Selector de Canales / Canciones Clásicas -->
+      <div class="radio-station-selector">
+        <label for="radioStationSelect"><i class="fa-solid fa-headphones"></i> Seleccionar Canal:</label>
+        <select id="radioStationSelect" class="form-control form-control-sm">
+          <option value="0">🌸 Spirited Away - One Summer's Day (Lofi Chill)</option>
+          <option value="1">🍃 My Neighbor Totoro - Ghibli Piano Chill</option>
+          <option value="2">🐺 Princess Mononoke - Ashitaka Theme Chill</option>
+          <option value="3">📻 LISTEN.moe Anime Radio (24/7 En Vivo)</option>
+          <option value="4">🌙 Anime Chill & Future Funk (Yumi.moe)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Elemento Audio para la Radio -->
+    <audio id="otakuAudioElement" preload="metadata"></audio>
+  </aside>
+
+  <!-- Botón Flotante Mini para abrir la Radio cuando esté oculta -->
+  <button id="btnFloatingRadioTrigger" class="floating-radio-trigger" title="Radio Otaku Tranqui (Música anime clásica)">
+    <div class="floating-eq-mini">
+      <span></span><span></span><span></span>
+    </div>
+    <i class="fa-solid fa-music"></i>
+    <span class="trigger-label">Radio Otaku</span>
+  </button>
+
   <!-- Contenedor de Alertas Toast -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -486,8 +598,8 @@
   <!-- Firebase SDK (Compat v10) - 100% Gratuito sin tarjeta -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=20261025_anime"></script>
-  <script src="js/db.js?v=20261025_anime"></script>
-  <script src="js/app.js?v=20261025_anime"></script>
+  <script src="js/firebase-config.js?v=20261026_vertical_radio"></script>
+  <script src="js/db.js?v=20261026_vertical_radio"></script>
+  <script src="js/app.js?v=20261026_vertical_radio"></script>
 </body>
 </html>
