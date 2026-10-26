@@ -827,11 +827,21 @@
         <div class="storage-audit-section">
           <div class="storage-audit-header">
             <div class="storage-audit-title">
-              <h4><i class="fa-solid fa-table-list"></i> Auditoría de Archivos</h4>
+              <h4><i class="fa-solid fa-table-list text-accent"></i> Auditoría de Archivos</h4>
               <span class="storage-count-badge" id="storageTableCountBadge">0 archivos</span>
             </div>
             
             <div class="storage-audit-tools">
+              <!-- Selector de Vista: Lista vs Cuadrícula -->
+              <div class="storage-view-toggle">
+                <button type="button" id="btnStorageViewList" class="btn-view-toggle active" title="Vista Lista">
+                  <i class="fa-solid fa-list"></i>
+                </button>
+                <button type="button" id="btnStorageViewGrid" class="btn-view-toggle" title="Vista Cuadrícula">
+                  <i class="fa-solid fa-table-cells-large"></i>
+                </button>
+              </div>
+
               <div class="storage-table-search">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" id="storageTableSearch" placeholder="Buscar actividad o PDF...">
@@ -847,21 +857,41 @@
             </div>
           </div>
 
-          <div class="storage-table-wrapper">
+          <!-- Vista 1: Tabla / Lista Completa (Sin cortes, espacio amplio) -->
+          <div class="storage-table-wrapper" id="storageTableWrapper">
             <table class="storage-table">
               <thead>
                 <tr>
-                  <th>Actividad</th>
-                  <th>Archivo PDF</th>
-                  <th>Tamaño</th>
-                  <th>% del Límite (1 MB)</th>
-                  <th>Estado</th>
+                  <th style="min-width: 190px;">Actividad</th>
+                  <th style="min-width: 220px;">Archivo PDF</th>
+                  <th style="min-width: 90px;">Tamaño</th>
+                  <th style="min-width: 140px;">% del Límite (1 MB)</th>
+                  <th style="min-width: 100px;">Estado</th>
                 </tr>
               </thead>
               <tbody id="storageBreakdownTableBody">
                 <!-- Filas dinámicas generadas por JS -->
               </tbody>
             </table>
+          </div>
+
+          <!-- Vista 2: Cuadrícula de Archivos (Grid View) -->
+          <div class="storage-grid-wrapper" id="storageGridWrapper" style="display: none;">
+            <!-- Cards dinámicas generadas por JS -->
+          </div>
+
+          <!-- Barra de Paginación (10 documentos por página) -->
+          <div class="storage-pagination-bar" id="storagePaginationBar">
+            <span class="storage-page-info" id="storagePageInfo">Mostrando 1 - 6 de 6 archivos</span>
+            <div class="storage-page-nav">
+              <button id="btnStoragePrevPage" class="btn btn-secondary btn-sm" disabled>
+                <i class="fa-solid fa-chevron-left"></i> Anterior
+              </button>
+              <span class="storage-page-indicator" id="storagePageIndicator">Pág. 1 de 1</span>
+              <button id="btnStorageNextPage" class="btn btn-secondary btn-sm" disabled>
+                Siguiente <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
         </div>
 

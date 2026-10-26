@@ -2102,6 +2102,9 @@ function setupTeamMembersModal() {
 // =========================================================
 let storageSearchQuery = '';
 let storageSortMode = 'size-desc';
+let storageViewMode = 'list'; // 'list' o 'grid'
+let storageCurrentPage = 1;
+const STORAGE_ITEMS_PER_PAGE = 10;
 
 function setupFirebaseStorageModal() {
   const btnOpen = document.getElementById('btnOpenFirebaseModal');
@@ -2111,10 +2114,15 @@ function setupFirebaseStorageModal() {
   const btnRecalc = document.getElementById('btnRecalculateStorage');
   const searchInput = document.getElementById('storageTableSearch');
   const sortSelect = document.getElementById('storageTableSort');
+  const btnViewList = document.getElementById('btnStorageViewList');
+  const btnViewGrid = document.getElementById('btnStorageViewGrid');
+  const btnPrevPage = document.getElementById('btnStoragePrevPage');
+  const btnNextPage = document.getElementById('btnStorageNextPage');
 
   if (!modal) return;
 
   const openStorageModal = () => {
+    storageCurrentPage = 1;
     updateStorageQuotaDisplay();
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -2139,9 +2147,46 @@ function setupFirebaseStorageModal() {
     }
   });
 
+  // Selector de vista: Lista vs Cuadrícula
+  if (btnViewList) {
+    btnViewList.addEventListener('click', () => {
+      storageViewMode = 'list';
+      btnViewList.classList.add('active');
+      if (btnViewGrid) btnViewGrid.classList.remove('active');
+      updateStorageQuotaDisplay();
+    });
+  }
+
+  if (btnViewGrid) {
+    btnViewGrid.addEventListener('click', () => {
+      storageViewMode = 'grid';
+      btnViewGrid.classList.add('active');
+      if (btnViewList) btnViewList.classList.remove('active');
+      updateStorageQuotaDisplay();
+    });
+  }
+
+  // Controles de Paginación
+  if (btnPrevPage) {
+    btnPrevPage.addEventListener('click', () => {
+      if (storageCurrentPage > 1) {
+        storageCurrentPage--;
+        updateStorageQuotaDisplay();
+      }
+    });
+  }
+
+  if (btnNextPage) {
+    btnNextPage.addEventListener('click', () => {
+      storageCurrentPage++;
+      updateStorageQuotaDisplay();
+    });
+  }
+
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       storageSearchQuery = e.target.value.toLowerCase().trim();
+      storageCurrentPage = 1;
       updateStorageQuotaDisplay();
     });
   }
@@ -2149,6 +2194,7 @@ function setupFirebaseStorageModal() {
   if (sortSelect) {
     sortSelect.addEventListener('change', (e) => {
       storageSortMode = e.target.value;
+      storageCurrentPage = 1;
       updateStorageQuotaDisplay();
     });
   }
@@ -2184,6 +2230,12 @@ function updateStorageQuotaDisplay() {
   const legendJson = document.getElementById('storageLegendJsonBytes');
   const tableBody = document.getElementById('storageBreakdownTableBody');
   const countBadge = document.getElementById('storageTableCountBadge');
+  const tableWrapper = document.getElementById('storageTableWrapper');
+  const gridWrapper = document.getElementById('storageGridWrapper');
+  const pageInfo = document.getElementById('storagePageInfo');
+  const pageIndicator = document.getElementById('storagePageIndicator');
+  const btnPrev = document.getElementById('btnStoragePrevPage');
+  const btnNext = document.getElementById('btnStorageNextPage');
 
   const SPARK_QUOTA_BYTES = 1024 * 1024 * 1024; // 1 GB = 1,024 MB
   const DOC_LIMIT_BYTES = 1024 * 1024; // 1 MB límite doc
@@ -2282,32 +2334,98 @@ function updateStorageQuotaDisplay() {
   if (legendJson) legendJson.textContent = formatBytes(totalJsonBytes);
   if (countBadge) countBadge.textContent = `${filtered.length} de ${activities.length} archivos`;
 
-  // Renderizar tabla interactiva
-  if (tableBody) {
-    if (filtered.length === 0) {
-      tableBody.innerHTML = `
-        <tr><td colspan="5" class="text-center" style="padding:1.5rem; color:#94a3b8;">No se encontraron archivos que coincidan con la búsqueda.</td></tr>
-      `;
-    } else {
-      tableBody.innerHTML = filtered.map(item => {
-        const percentOfDoc = Math.min(100, ((item.sizeBytes / DOC_LIMIT_BYTES) * 100)).toFixed(1);
-        let statusBadge = '<span class="status-pill status-approved"><i class="fa-solid fa-check"></i> Óptimo</span>';
-        if (item.sizeBytes > 800000) {
-          statusBadge = '<span class="status-pill status-pending"><i class="fa-solid fa-triangle-exclamation"></i> Casi Lleno</span>';
-        }
+  // Paginación de 10 en 10
+  const totalItems = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / STORAGE_ITEMS_PER_PAGE));
+  if (storageCurrentPage > totalPages) storageCurrentPage = totalPages;
+  if (storageCurrentPage < 1) storageCurrentPage = 1;
 
-        return `
-          <tr>
-            <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td><i class="fa-solid fa-file-pdf text-accent"></i> ${escapeHtml(item.pdfName)}</td>
-            <td><strong>${formatBytes(item.sizeBytes)}</strong></td>
-            <td>
-              <span class="anime-pill-badge-sm">${percentOfDoc}% de 1 MB</span>
-            </td>
-            <td>${statusBadge}</td>
-          </tr>
+  const startIndex = (storageCurrentPage - 1) * STORAGE_ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + STORAGE_ITEMS_PER_PAGE, totalItems);
+  const pagedItems = filtered.slice(startIndex, endIndex);
+
+  if (pageInfo) {
+    pageInfo.textContent = totalItems === 0 ? 'Sin archivos' : `Mostrando ${startIndex + 1} - ${endIndex} de ${totalItems} archivos`;
+  }
+  if (pageIndicator) {
+    pageIndicator.textContent = `Página ${storageCurrentPage} de ${totalPages}`;
+  }
+  if (btnPrev) btnPrev.disabled = (storageCurrentPage <= 1);
+  if (btnNext) btnNext.disabled = (storageCurrentPage >= totalPages);
+
+  // Renderizar según Modo: Vista Lista vs Vista Cuadrícula
+  if (storageViewMode === 'grid') {
+    if (tableWrapper) tableWrapper.style.display = 'none';
+    if (gridWrapper) {
+      gridWrapper.style.display = 'grid';
+      if (pagedItems.length === 0) {
+        gridWrapper.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: #94a3b8;">
+            No se encontraron archivos que coincidan.
+          </div>
         `;
-      }).join('');
+      } else {
+        gridWrapper.innerHTML = pagedItems.map(item => {
+          const percentOfDoc = Math.min(100, ((item.sizeBytes / DOC_LIMIT_BYTES) * 100)).toFixed(1);
+          let statusBadge = '<span class="status-pill status-approved"><i class="fa-solid fa-check"></i> Óptimo</span>';
+          if (item.sizeBytes > 800000) {
+            statusBadge = '<span class="status-pill status-pending"><i class="fa-solid fa-triangle-exclamation"></i> Casi Lleno</span>';
+          }
+
+          return `
+            <div class="storage-file-card">
+              <div class="storage-file-top">
+                <div class="storage-file-icon">
+                  <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div class="storage-file-titles">
+                  <h5 class="storage-file-title" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h5>
+                  <span class="storage-file-pdf" title="${escapeHtml(item.pdfName)}"><i class="fa-solid fa-paperclip"></i> ${escapeHtml(item.pdfName)}</span>
+                </div>
+              </div>
+              <div class="storage-file-progress-bar">
+                <div class="storage-file-progress-fill" style="width: ${percentOfDoc}%;"></div>
+              </div>
+              <div class="storage-file-meta-row">
+                <span class="storage-file-size">${formatBytes(item.sizeBytes)}</span>
+                <span class="anime-pill-badge-sm">${percentOfDoc}% de 1MB</span>
+                ${statusBadge}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+  } else {
+    // Vista Lista
+    if (gridWrapper) gridWrapper.style.display = 'none';
+    if (tableWrapper) tableWrapper.style.display = 'block';
+    if (tableBody) {
+      if (pagedItems.length === 0) {
+        tableBody.innerHTML = `
+          <tr><td colspan="5" class="text-center" style="padding:1.5rem; color:#94a3b8;">No se encontraron archivos que coincidan.</td></tr>
+        `;
+      } else {
+        tableBody.innerHTML = pagedItems.map(item => {
+          const percentOfDoc = Math.min(100, ((item.sizeBytes / DOC_LIMIT_BYTES) * 100)).toFixed(1);
+          let statusBadge = '<span class="status-pill status-approved"><i class="fa-solid fa-check"></i> Óptimo</span>';
+          if (item.sizeBytes > 800000) {
+            statusBadge = '<span class="status-pill status-pending"><i class="fa-solid fa-triangle-exclamation"></i> Casi Lleno</span>';
+          }
+
+          return `
+            <tr>
+              <td><strong>${escapeHtml(item.name)}</strong></td>
+              <td><i class="fa-solid fa-file-pdf text-accent"></i> ${escapeHtml(item.pdfName)}</td>
+              <td><strong>${formatBytes(item.sizeBytes)}</strong></td>
+              <td>
+                <span class="anime-pill-badge-sm">${percentOfDoc}% de 1 MB</span>
+              </td>
+              <td>${statusBadge}</td>
+            </tr>
+          `;
+        }).join('');
+      }
     }
   }
 }
