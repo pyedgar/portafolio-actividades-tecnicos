@@ -16,6 +16,37 @@ let selectedPdfFile = null;
 let currentViewerBlobUrl = null;
 let currentDocSource = 'file'; // 'file' o 'drive'
 
+// Galería de estilos anime con colores neón (Rojos, Rosas y Morados)
+const ANIME_DEFAULTS = [
+  { img: 'assets/images/anime/anime_pin_1.jpg', theme: 'neon-purple', tag: 'GOJO SATORU // 呪術廻戦', kanji: '虚式「茈」' },
+  { img: 'assets/images/anime/anime_pin_2.png', theme: 'neon-pink', tag: 'TOGA HIMIKO // 渡我被身子', kanji: '狂気・愛' },
+  { img: 'assets/images/anime/anime_neon_gojo_purple.jpg', theme: 'neon-purple', tag: 'HOLLOW PURPLE // 領域展開', kanji: '無量空処' },
+  { img: 'assets/images/anime/anime_neon_cyberpunk_pink.jpg', theme: 'neon-pink', tag: 'CYBERPUNK // ネオン', kanji: '電脳都市' },
+  { img: 'assets/images/anime/anime_pin_3.jpg', theme: 'neon-red', tag: 'MANGA ART // 漫画美学', kanji: '覚醒・血界' },
+  { img: 'assets/images/anime/anime_neon_samurai.jpg', theme: 'neon-red', tag: 'SAMURAI SILHOUETTE // 侍の影', kanji: '一閃・斬撃' },
+  { img: 'assets/images/anime/anime_neon_tokyo_night.jpg', theme: 'neon-purple', tag: 'TOKYO NIGHT // 東京の夜', kanji: '夜桜・月下' },
+  { img: 'assets/images/anime/anime_neon_samurai_red.jpg', theme: 'neon-red', tag: 'BLADE MASTER // 鬼神の刃', kanji: '紅蓮・刃' },
+  { img: 'assets/images/anime/anime_neon_synthwave_purple.jpg', theme: 'neon-purple', tag: 'SYNTHWAVE // シンセ', kanji: '超光速' }
+];
+
+function getAnimeMetaForActivity(activity, index) {
+  if (activity && activity.animeImage) {
+    return {
+      img: activity.animeImage,
+      theme: activity.animeTheme || 'neon-pink',
+      tag: activity.animeTag || 'ANIME OTAKU',
+      kanji: activity.animeKanji || '活動'
+    };
+  }
+  const fallback = ANIME_DEFAULTS[index % ANIME_DEFAULTS.length];
+  return {
+    img: fallback.img,
+    theme: fallback.theme,
+    tag: fallback.tag,
+    kanji: fallback.kanji
+  };
+}
+
 // Elementos DOM
 const dom = {
   teamChipsContainer: document.getElementById('teamChipsContainer'),
@@ -28,6 +59,7 @@ const dom = {
   btnClearSearch: document.getElementById('btnClearSearch'),
   filterGroup: document.getElementById('filterGroup'),
   filterMember: document.getElementById('filterMember'),
+  customAnimeUrlInput: document.getElementById('customAnimeUrlInput'),
 
   // Métricas
   statTotalActivities: document.getElementById('statTotalActivities'),
@@ -95,6 +127,8 @@ function isMobileDevice() {
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', async () => {
+  setupAnimeVideoControls();
+  setupAnimeCoverSelector();
   renderTeamChips();
   renderMemberCheckboxes();
   setupEventListeners();
@@ -110,6 +144,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
+// Control del Video Anime de Fondo (Pausa/Reanudar y Audio)
+function setupAnimeVideoControls() {
+  const bgVideo = document.getElementById('bgVideo');
+  const btnToggleVideoPlay = document.getElementById('btnToggleVideoPlay');
+  const btnToggleVideoAudio = document.getElementById('btnToggleVideoAudio');
+
+  if (!bgVideo) return;
+
+  // Autoplay silencioso con reintento si el navegador restringe
+  const attemptPlay = () => {
+    bgVideo.play().catch(() => {
+      window.addEventListener('click', () => {
+        bgVideo.play().catch(() => {});
+      }, { once: true });
+    });
+  };
+  attemptPlay();
+
+  if (btnToggleVideoPlay) {
+    btnToggleVideoPlay.addEventListener('click', () => {
+      if (bgVideo.paused) {
+        bgVideo.play();
+        btnToggleVideoPlay.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        btnToggleVideoPlay.title = 'Pausar video anime';
+      } else {
+        bgVideo.pause();
+        btnToggleVideoPlay.innerHTML = '<i class="fa-solid fa-play"></i>';
+        btnToggleVideoPlay.title = 'Reproducir video anime';
+      }
+    });
+  }
+
+  if (btnToggleVideoAudio) {
+    btnToggleVideoAudio.addEventListener('click', () => {
+      bgVideo.muted = !bgVideo.muted;
+      if (bgVideo.muted) {
+        btnToggleVideoAudio.classList.remove('active-sound');
+        btnToggleVideoAudio.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> <span class="btn-label-mobile-hide">Audio</span>';
+        showToast('Audio de fondo silenciado.', 'info');
+      } else {
+        btnToggleVideoAudio.classList.add('active-sound');
+        btnToggleVideoAudio.innerHTML = '<i class="fa-solid fa-volume-high"></i> <span class="btn-label-mobile-hide">Sonido ON</span>';
+        showToast('¡Audio de fondo activado!', 'success');
+      }
+    });
+  }
+}
+
+// Selector visual de portadas anime en el formulario de creación
+function setupAnimeCoverSelector() {
+  const container = document.getElementById('animeCoversSelector');
+  if (!container) return;
+
+  const options = container.querySelectorAll('.anime-cover-option');
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      options.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      const radio = opt.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    });
+  });
+}
 
 // Actualizar indicador de estado de la nube
 function updateCloudBadge() {
@@ -387,6 +485,14 @@ function closeCreateModal() {
   dom.activityForm.reset();
   selectedPdfFile = null;
   if (dom.driveUrlInput) dom.driveUrlInput.value = '';
+  if (dom.customAnimeUrlInput) dom.customAnimeUrlInput.value = '';
+  const firstCover = document.querySelector('.anime-cover-option');
+  if (firstCover) {
+    document.querySelectorAll('.anime-cover-option').forEach(o => o.classList.remove('selected'));
+    firstCover.classList.add('selected');
+    const radio = firstCover.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+  }
   setDocSource('file');
   dom.dropzoneIdle.style.display = 'block';
   dom.dropzoneSelected.style.display = 'none';
@@ -465,6 +571,28 @@ async function handleFormSubmit(e) {
 
     const formattedDate = formatDateTimeInput(fechaVal);
 
+    // Portada anime seleccionada (Rojo, Rosa o Morado Neón)
+    let animeImage = 'assets/images/anime/anime_neon_gojo_purple.jpg';
+    let animeTheme = 'neon-purple';
+    let animeTag = 'GOJO SATORU // 呪術廻戦';
+    let animeKanji = '虚式「茈」';
+
+    const customUrl = dom.customAnimeUrlInput ? dom.customAnimeUrlInput.value.trim() : '';
+    if (customUrl) {
+      animeImage = customUrl;
+      animeTheme = 'neon-pink';
+      animeTag = 'CUSTOM ANIME // カスタム';
+      animeKanji = '特別';
+    } else {
+      const selectedRadio = document.querySelector('input[name="animeCoverOption"]:checked');
+      if (selectedRadio) {
+        animeImage = selectedRadio.value;
+        animeTheme = selectedRadio.getAttribute('data-theme') || 'neon-purple';
+        animeTag = selectedRadio.getAttribute('data-tag') || 'ANIME OTAKU';
+        animeKanji = '活動';
+      }
+    }
+
     const newActivity = {
       id: 'act-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       nombre,
@@ -479,6 +607,10 @@ async function handleFormSubmit(e) {
       pdfUrl,
       isGoogleDrive,
       driveOriginalUrl,
+      animeImage,
+      animeTheme,
+      animeTag,
+      animeKanji,
       createdAt: new Date(fechaVal).getTime() || Date.now()
     };
 
@@ -611,11 +743,12 @@ function renderCards(list) {
   dom.emptyState.style.display = 'none';
   dom.activitiesGrid.style.display = 'grid';
 
-  dom.activitiesGrid.innerHTML = list.map(activity => {
+  dom.activitiesGrid.innerHTML = list.map((activity, index) => {
     const hasPdf = Boolean(activity.pdfName || activity.pdfBlob || activity.pdfUrl);
     const isDrive = Boolean(activity.isGoogleDrive || (activity.pdfUrl && activity.pdfUrl.includes('drive.google.com')));
     const pdfSizeText = isDrive ? 'Google Drive' : (activity.pdfSize ? formatBytes(activity.pdfSize) : 'Documento PDF');
     const isMainGroup = activity.grupo && activity.grupo.includes('Los Técnicos');
+    const animeMeta = getAnimeMetaForActivity(activity, index);
 
     const memberPillsHtml = (activity.integrantes || []).map(m => `
       <span class="member-pill">
@@ -624,8 +757,20 @@ function renderCards(list) {
     `).join('');
 
     return `
-      <div class="activity-card" data-id="${activity.id}">
+      <div class="activity-card theme-${animeMeta.theme}" data-id="${activity.id}">
         <div>
+          <!-- Portada Anime Neón (Rojos, Rosas y Morados) -->
+          <div class="card-anime-header">
+            <img src="${escapeHtml(animeMeta.img)}" alt="${escapeHtml(activity.nombre)}" class="card-anime-img" loading="lazy" onerror="this.src='assets/images/anime/anime_neon_samurai.jpg'">
+            <div class="card-anime-gradient"></div>
+            <div class="anime-card-badge-row">
+              <span class="anime-category-badge theme-${animeMeta.theme}">
+                <i class="fa-solid fa-bolt"></i> ${escapeHtml(animeMeta.tag)}
+              </span>
+              <span class="anime-kanji-badge">${escapeHtml(animeMeta.kanji || '活動')}</span>
+            </div>
+          </div>
+
           <div class="card-top">
             <span class="group-badge ${isMainGroup ? 'badge-accent' : ''}">
               <i class="fa-solid fa-layer-group"></i> ${escapeHtml(activity.grupo || 'General')}

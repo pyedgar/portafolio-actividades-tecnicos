@@ -21,6 +21,9 @@ const OFFICIAL_CATALOG = [
     pdfSize: 253387,
     pdfType: "application/pdf",
     pdfUrl: "actividades_pdf/Act1 07_09_2026 ACKI.pdf",
+    animeImage: "assets/images/anime/anime_pin_1.jpg",
+    animeTheme: "neon-purple",
+    animeTag: "GOJO SATORU // 呪術廻戦",
     createdAt: 1788768000000
   },
   {
@@ -40,6 +43,9 @@ const OFFICIAL_CATALOG = [
     pdfSize: 25804,
     pdfType: "application/pdf",
     pdfUrl: "actividades_pdf/Act2 14_09_2026 Equipo_Tecnicos.pdf",
+    animeImage: "assets/images/anime/anime_pin_2.png",
+    animeTheme: "neon-pink",
+    animeTag: "TOGA HIMIKO // 渡我被身子",
     createdAt: 1789372800000
   },
   {
@@ -59,6 +65,9 @@ const OFFICIAL_CATALOG = [
     pdfSize: 82515,
     pdfType: "application/pdf",
     pdfUrl: "actividades_pdf/Preguntas_Git_y_GitHub_Ramas.pdf",
+    animeImage: "assets/images/anime/anime_neon_gojo_purple.jpg",
+    animeTheme: "neon-purple",
+    animeTag: "HOLLOW PURPLE // 虚式「茈」",
     createdAt: 1790582400000
   },
   {
@@ -78,6 +87,9 @@ const OFFICIAL_CATALOG = [
     pdfSize: 7303598,
     pdfType: "application/pdf",
     pdfUrl: "actividades_pdf/Presentacion_Proyecto_Agencia_Marketing.pdf",
+    animeImage: "assets/images/anime/anime_neon_cyberpunk_pink.jpg",
+    animeTheme: "neon-pink",
+    animeTag: "CYBERPUNK // ネオンピンク",
     createdAt: 1791187200000
   },
   {
@@ -97,6 +109,9 @@ const OFFICIAL_CATALOG = [
     pdfSize: 643034,
     pdfType: "application/pdf",
     pdfUrl: "actividades_pdf/Reporte_Fusion_Ramas_Git.pdf",
+    animeImage: "assets/images/anime/anime_pin_3.jpg",
+    animeTheme: "neon-red",
+    animeTag: "MANGA ART // 漫画美学",
     createdAt: 1791829800000
   },
   {
@@ -113,6 +128,12 @@ const OFFICIAL_CATALOG = [
       "Miguel Fuentes Hernández"
     ],
     pdfName: "Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
+    pdfSize: 740124,
+    pdfType: "application/pdf",
+    pdfUrl: "actividades_pdf/Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",
+    animeImage: "assets/images/anime/anime_neon_samurai.jpg",
+    animeTheme: "neon-red",
+    animeTag: "SAMURAI SILHOUETTE // 侍の影",
     pdfSize: 740124,
     pdfType: "application/pdf",
     pdfUrl: "actividades_pdf/Reporte_Actividad_3_Repositorio_Ramas_Integrantes.pdf",

@@ -13,24 +13,48 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=20261025_anime">
 </head>
-<body>
+<body class="anime-theme">
+
+  <!-- Fondo de Video Anime Oficial (Samurai Live Wallpaper Pinterest https://pin.it/55IbeUJIz) -->
+  <div class="anime-video-bg-container" id="animeVideoContainer">
+    <video id="bgVideo" autoplay muted loop playsinline preload="auto" poster="assets/images/anime/anime_neon_samurai.jpg">
+      <source src="assets/videos/anime_background.mp4" type="video/mp4">
+      <source src="https://v1.pinimg.com/videos/iht/expMp4/ea/51/3c/ea513c1c0442eba57b4cb8c78f5dc960_720w.mp4" type="video/mp4">
+    </video>
+    <div class="anime-video-overlay"></div>
+    <div class="anime-cyber-scanlines"></div>
+  </div>
 
   <!-- Barra de Navegación Superior -->
   <header class="navbar">
     <div class="nav-container">
       <div class="brand">
-        <div class="brand-icon">
-          <i class="fa-solid fa-folder-open"></i>
+        <div class="brand-icon anime-brand-glow">
+          <i class="fa-solid fa-dragon"></i>
         </div>
         <div class="brand-text">
-          <h1>Portafolio de Actividades</h1>
-          <span>Los Técnicos • Universidad Tecnológica de Coahuila</span>
+          <div class="brand-title-wrap">
+            <h1>Portafolio de Actividades</h1>
+            <span class="anime-pill-badge">アニメ • OTAKU VIBES</span>
+          </div>
+          <span>Los Técnicos • テクニカルチーム • UTC</span>
         </div>
       </div>
 
       <div class="nav-actions">
+        <!-- Controles de Video Anime de Fondo -->
+        <div class="video-media-controls" title="Control del Video Anime de Fondo">
+          <button id="btnToggleVideoPlay" class="btn btn-anime-video" title="Pausar / Reproducir video anime">
+            <i class="fa-solid fa-pause"></i>
+          </button>
+          <button id="btnToggleVideoAudio" class="btn btn-anime-video" title="Activar / Silenciar audio del video anime">
+            <i class="fa-solid fa-volume-xmark"></i>
+            <span class="btn-label-mobile-hide">Audio</span>
+          </button>
+        </div>
+
         <div class="cloud-status-badge" id="cloudStatusBadge" title="Estado de sincronización en Firebase">
           <i class="fa-solid fa-cloud"></i>
           <span id="cloudStatusText">Firebase Conectado</span>
@@ -44,7 +68,7 @@
           <span>Importar</span>
         </button>
         <input type="file" id="fileRestoreInput" accept=".json" style="display:none;">
-        <button id="btnOpenModal" class="btn btn-primary">
+        <button id="btnOpenModal" class="btn btn-primary btn-anime-glow">
           <i class="fa-solid fa-plus"></i>
           <span>Nueva Actividad</span>
         </button>
@@ -52,15 +76,15 @@
     </div>
   </header>
 
-  <!-- Banner Informativo del Equipo -->
-  <section class="team-banner">
+  <!-- Banner Informativo del Equipo (Anime Otaku Hero Squad) -->
+  <section class="team-banner anime-banner-box">
     <div class="container">
       <div class="banner-content">
-        <div class="banner-badge">
-          <i class="fa-solid fa-users"></i> Equipo Oficial - Cursos Lunes
+        <div class="banner-badge anime-glow-badge">
+          <i class="fa-solid fa-fire-flame-curved"></i> LOS TÉCNICOS SQUAD • 技師チーム • CURSOS LUNES
         </div>
         <h2>Repositorio de Actividades y Documentación PDF</h2>
-        <p>Espacio colaborativo de entrega, consulta y lectura de actividades académicas para los grupos A y B.</p>
+        <p>Espacio colaborativo de entrega, consulta interactiva y lectura de actividades académicas • Grupos A y B</p>
         
         <div class="team-chips" id="teamChipsContainer">
           <!-- Integrantes oficiales cargados dinámicamente -->
@@ -69,12 +93,12 @@
     </div>
   </section>
 
-  <!-- Panel de Métricas / Resumen -->
+  <!-- Panel de Métricas / Resumen (Estilo Cyberpunk Neon) -->
   <section class="stats-section">
     <div class="container">
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon icon-blue">
+        <div class="stat-card anime-stat-red">
+          <div class="stat-icon icon-red-neon">
             <i class="fa-solid fa-list-check"></i>
           </div>
           <div class="stat-info">
@@ -83,8 +107,8 @@
           </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon icon-emerald">
+        <div class="stat-card anime-stat-pink">
+          <div class="stat-icon icon-pink-neon">
             <i class="fa-solid fa-file-pdf"></i>
           </div>
           <div class="stat-info">
@@ -93,8 +117,8 @@
           </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon icon-violet">
+        <div class="stat-card anime-stat-purple">
+          <div class="stat-icon icon-purple-neon">
             <i class="fa-solid fa-user-group"></i>
           </div>
           <div class="stat-info">
@@ -259,6 +283,67 @@
           </div>
         </div>
 
+        <!-- Portada Anime y Estilo Neón (Rojos, Rosas y Morados) -->
+        <div class="form-group">
+          <label class="form-label">
+            <span>Portada Anime & Estilo Neón (Rojos, Rosas y Morados)</span>
+            <span class="anime-pill-badge-sm">ANIME OTAKU</span>
+          </label>
+          <div class="anime-covers-grid" id="animeCoversSelector">
+            <label class="anime-cover-option selected">
+              <input type="radio" name="animeCoverOption" value="assets/images/anime/anime_neon_gojo_purple.jpg" data-tag="GOJO SATORU // 呪術廻戦" data-theme="neon-purple" checked>
+              <img src="assets/images/anime/anime_neon_gojo_purple.jpg" alt="Gojo Satoru">
+              <div class="anime-cover-overlay">
+                <span class="cover-theme-dot theme-purple"></span>
+                <span class="cover-name">Gojo Morado</span>
+              </div>
+            </label>
+            <label class="anime-cover-option">
+              <input type="radio" name="animeCoverOption" value="assets/images/anime/anime_neon_cyberpunk_pink.jpg" data-tag="TOGA HIMIKO // 渡我被身子" data-theme="neon-pink">
+              <img src="assets/images/anime/anime_neon_cyberpunk_pink.jpg" alt="Toga Himiko Pink">
+              <div class="anime-cover-overlay">
+                <span class="cover-theme-dot theme-pink"></span>
+                <span class="cover-name">Toga Rosa</span>
+              </div>
+            </label>
+            <label class="anime-cover-option">
+              <input type="radio" name="animeCoverOption" value="assets/images/anime/anime_neon_samurai_red.jpg" data-tag="SAMURAI // 侍の影" data-theme="neon-red">
+              <img src="assets/images/anime/anime_neon_samurai_red.jpg" alt="Samurai Red">
+              <div class="anime-cover-overlay">
+                <span class="cover-theme-dot theme-red"></span>
+                <span class="cover-name">Samurái Rojo</span>
+              </div>
+            </label>
+            <label class="anime-cover-option">
+              <input type="radio" name="animeCoverOption" value="assets/images/anime/anime_pin_1.jpg" data-tag="MANGA AESTHETIC // 漫画" data-theme="neon-purple">
+              <img src="assets/images/anime/anime_pin_1.jpg" alt="Manga Aesthetic">
+              <div class="anime-cover-overlay">
+                <span class="cover-theme-dot theme-purple"></span>
+                <span class="cover-name">Manga Neón</span>
+              </div>
+            </label>
+            <label class="anime-cover-option">
+              <input type="radio" name="animeCoverOption" value="assets/images/anime/anime_pin_2.png" data-tag="AESTHETIC ANIME // 美学" data-theme="neon-pink">
+              <img src="assets/images/anime/anime_pin_2.png" alt="Anime Art">
+              <div class="anime-cover-overlay">
+                <span class="cover-theme-dot theme-pink"></span>
+                <span class="cover-name">Cyber Rosa</span>
+              </div>
+            </label>
+            <label class="anime-cover-option">
+              <input type="radio" name="animeCoverOption" value="assets/images/anime/anime_neon_tokyo_night.jpg" data-tag="TOKYO NIGHT // 東京" data-theme="neon-purple">
+              <img src="assets/images/anime/anime_neon_tokyo_night.jpg" alt="Tokyo Night">
+              <div class="anime-cover-overlay">
+                <span class="cover-theme-dot theme-purple"></span>
+                <span class="cover-name">Tokyo Morado</span>
+              </div>
+            </label>
+          </div>
+          <div class="custom-anime-url-box">
+            <input type="url" id="customAnimeUrlInput" class="form-control form-control-sm" placeholder="O pega un enlace de imagen anime personalizado (opcional)...">
+          </div>
+        </div>
+
         <!-- Subida de Documento (Local o Google Drive) -->
         <div class="form-group">
           <label class="form-label">
@@ -401,8 +486,8 @@
   <!-- Firebase SDK (Compat v10) - 100% Gratuito sin tarjeta -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=20261025"></script>
-  <script src="js/db.js?v=20261025"></script>
-  <script src="js/app.js?v=20261025_drive"></script>
+  <script src="js/firebase-config.js?v=20261025_anime"></script>
+  <script src="js/db.js?v=20261025_anime"></script>
+  <script src="js/app.js?v=20261025_anime"></script>
 </body>
 </html>
