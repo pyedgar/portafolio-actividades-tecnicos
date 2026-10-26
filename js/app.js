@@ -1368,7 +1368,7 @@ function showToast(message, type = 'info') {
 }
 
 // =========================================================
-// MÓDULO 1: PREFERENCIAS DE TEMA Y COLORES (ESTILO OLYMPUS)
+// MÓDULO 1: PREFERENCIAS DE TEMA Y COLORES GLOBALES
 // =========================================================
 const PREF_BG_PALETTE = [
   { id: 'onyx', name: 'Negro Ónix', color: '#08040d', cardBg: '#120b1c' },
@@ -1381,22 +1381,22 @@ const PREF_BG_PALETTE = [
 ];
 
 const PREF_ACCENT_PALETTE = [
-  { id: 'amber', name: 'Dorado / Ámbar', color: '#d4973b', glow: 'rgba(212, 151, 59, 0.45)' },
-  { id: 'yellow', name: 'Amarillo Neón', color: '#eab308', glow: 'rgba(234, 179, 8, 0.45)' },
-  { id: 'orange', name: 'Naranja Neón', color: '#f97316', glow: 'rgba(249, 115, 22, 0.45)' },
-  { id: 'coral', name: 'Rojo Carmesí', color: '#ff2e56', glow: 'rgba(255, 46, 86, 0.45)' },
-  { id: 'pink', name: 'Rosa Neón', color: '#ff2a85', glow: 'rgba(255, 42, 133, 0.45)' },
-  { id: 'magenta', name: 'Fucsia Magenta', color: '#ec4899', glow: 'rgba(236, 72, 153, 0.45)' },
-  { id: 'violet', name: 'Violeta Neón', color: '#a855f7', glow: 'rgba(168, 85, 247, 0.45)' },
-  { id: 'purple', name: 'Púrpura Lavanda', color: '#8b5cf6', glow: 'rgba(139, 92, 246, 0.45)' },
-  { id: 'periwinkle', name: 'Azul Periwinkle', color: '#6366f1', glow: 'rgba(99, 102, 241, 0.45)' },
-  { id: 'skyblue', name: 'Azul Cielo', color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.45)' },
-  { id: 'cyan', name: 'Cyan Eléctrico', color: '#00f0ff', glow: 'rgba(0, 240, 255, 0.45)' },
-  { id: 'mint', name: 'Menta / Esmeralda', color: '#10b981', glow: 'rgba(16, 185, 129, 0.45)' },
-  { id: 'lime', name: 'Verde Lima Neón', color: '#84cc16', glow: 'rgba(132, 204, 22, 0.45)' }
+  { id: 'amber', name: 'Dorado / Ámbar', color: '#d4973b', secondary: '#f97316', tertiary: '#ffd166', glow: 'rgba(212, 151, 59, 0.5)' },
+  { id: 'yellow', name: 'Amarillo Neón', color: '#eab308', secondary: '#f59e0b', tertiary: '#fde047', glow: 'rgba(234, 179, 8, 0.5)' },
+  { id: 'orange', name: 'Naranja Neón', color: '#f97316', secondary: '#ef4444', tertiary: '#fb923c', glow: 'rgba(249, 115, 22, 0.5)' },
+  { id: 'coral', name: 'Rojo Carmesí', color: '#ff2e56', secondary: '#a855f7', tertiary: '#ff758f', glow: 'rgba(255, 46, 86, 0.5)' },
+  { id: 'pink', name: 'Rosa Neón', color: '#ff2a85', secondary: '#a855f7', tertiary: '#ff70a6', glow: 'rgba(255, 42, 133, 0.5)' },
+  { id: 'magenta', name: 'Fucsia Magenta', color: '#ec4899', secondary: '#8b5cf6', tertiary: '#f472b6', glow: 'rgba(236, 72, 153, 0.5)' },
+  { id: 'violet', name: 'Violeta Neón', color: '#a855f7', secondary: '#ff2a85', tertiary: '#c084fc', glow: 'rgba(168, 85, 247, 0.5)' },
+  { id: 'purple', name: 'Púrpura Místico', color: '#8b5cf6', secondary: '#06b6d4', tertiary: '#a78bfa', glow: 'rgba(139, 92, 246, 0.5)' },
+  { id: 'periwinkle', name: 'Azul Periwinkle', color: '#6366f1', secondary: '#ec4899', tertiary: '#818cf8', glow: 'rgba(99, 102, 241, 0.5)' },
+  { id: 'skyblue', name: 'Azul Cielo', color: '#38bdf8', secondary: '#818cf8', tertiary: '#7dd3fc', glow: 'rgba(56, 189, 248, 0.5)' },
+  { id: 'cyan', name: 'Cyan Eléctrico', color: '#00f0ff', secondary: '#a855f7', tertiary: '#67e8f9', glow: 'rgba(0, 240, 255, 0.5)' },
+  { id: 'mint', name: 'Menta / Esmeralda', color: '#10b981', secondary: '#06b6d4', tertiary: '#34d399', glow: 'rgba(16, 185, 129, 0.5)' },
+  { id: 'lime', name: 'Verde Lima Neón', color: '#84cc16', secondary: '#10b981', tertiary: '#a3e635', glow: 'rgba(132, 204, 22, 0.5)' }
 ];
 
-const PREF_STORAGE_KEY = 'portafolio_user_preferences_v1';
+const PREF_STORAGE_KEY = 'portafolio_user_preferences_v2';
 
 let userPrefs = {
   themeMode: 'dark',
@@ -1564,38 +1564,63 @@ function applyPreferences() {
     (userPrefs.themeMode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
 
   if (isLight) {
-    root.style.setProperty('--bg-dark', '#f8fafc');
+    root.style.setProperty('--bg-main', '#f8fafc');
     root.style.setProperty('--bg-card', '#ffffff');
     root.style.setProperty('--bg-card-hover', '#f1f5f9');
-    root.style.setProperty('--text-primary', '#0f172a');
-    root.style.setProperty('--text-secondary', '#475569');
-    root.style.setProperty('--text-muted', '#64748b');
+    root.style.setProperty('--text-main', '#0f172a');
+    root.style.setProperty('--text-muted', '#475569');
+    root.style.setProperty('--text-light', '#64748b');
     root.style.setProperty('--navbar-bg', 'rgba(255, 255, 255, 0.94)');
     root.style.setProperty('--navbar-border', 'rgba(203, 213, 225, 0.8)');
     root.style.setProperty('--drawer-bg', '#ffffff');
     document.body.classList.add('theme-light');
   } else {
-    root.style.setProperty('--bg-dark', currentBg.color);
+    root.style.setProperty('--bg-main', currentBg.color);
     root.style.setProperty('--bg-card', currentBg.cardBg);
     root.style.setProperty('--bg-card-hover', '#1c1333');
-    root.style.setProperty('--text-primary', '#ffffff');
-    root.style.setProperty('--text-secondary', '#e2e8f0');
-    root.style.setProperty('--text-muted', '#94a3b8');
+    root.style.setProperty('--text-main', '#ffffff');
+    root.style.setProperty('--text-muted', '#cbd5e1');
+    root.style.setProperty('--text-light', '#94a3b8');
     root.style.setProperty('--navbar-bg', `${currentBg.color}e6`);
     root.style.setProperty('--navbar-border', `${currentAccent.color}55`);
     root.style.setProperty('--drawer-bg', currentBg.cardBg);
     document.body.classList.remove('theme-light');
   }
 
-  root.style.setProperty('--color-primary', currentAccent.color);
-  root.style.setProperty('--color-primary-hover', currentAccent.color);
-  root.style.setProperty('--color-primary-glow', currentAccent.glow);
-  root.style.setProperty('--color-accent', currentAccent.color);
-
-  // Intensidad de resplandor neón
+  // Paleta Armónica Global
+  const p = currentAccent.color;
+  const s = currentAccent.secondary;
+  const t = currentAccent.tertiary;
+  const glow = currentAccent.glow;
   const glowFactor = (userPrefs.glowIntensity || 100) / 100;
+
+  root.style.setProperty('--primary', p);
+  root.style.setProperty('--primary-hover', t);
+  root.style.setProperty('--primary-light', `${p}26`);
+  root.style.setProperty('--primary-border', `${p}66`);
+  root.style.setProperty('--color-primary', p);
+  root.style.setProperty('--color-primary-hover', t);
+  root.style.setProperty('--color-primary-glow', glow);
+  root.style.setProperty('--color-secondary', s);
+  root.style.setProperty('--color-accent', p);
+  root.style.setProperty('--border-hover', p);
+
+  // Armonizar variables neón anime
+  root.style.setProperty('--neon-pink', p);
+  root.style.setProperty('--neon-purple', s);
+  root.style.setProperty('--neon-red', t);
+  root.style.setProperty('--neon-pink-glow', glow);
+  root.style.setProperty('--neon-purple-glow', `${s}70`);
+
+  // Gradiente global
+  root.style.setProperty('--anime-gradient-main', `linear-gradient(135deg, ${p}, ${s})`);
+
+  // Intensidad de resplandor neón en tarjetas
   root.style.setProperty('--anime-card-shadow', 
-    `0 8px 30px rgba(0, 0, 0, 0.75), 0 0 ${Math.round(18 * glowFactor)}px ${currentAccent.glow}, 0 0 ${Math.round(32 * glowFactor)}px rgba(168, 85, 247, ${0.2 * glowFactor})`
+    `0 10px 30px rgba(0, 0, 0, 0.8), 0 0 ${Math.round(18 * glowFactor)}px ${glow}, 0 0 ${Math.round(35 * glowFactor)}px ${s}40`
+  );
+  root.style.setProperty('--anime-card-shadow-hover', 
+    `0 16px 45px rgba(0, 0, 0, 0.92), 0 0 ${Math.round(28 * glowFactor)}px ${glow}, 0 0 ${Math.round(50 * glowFactor)}px ${s}75`
   );
 
   try {
@@ -1604,7 +1629,7 @@ function applyPreferences() {
 }
 
 // =========================================================
-// MÓDULO 2: INTEGRANTES DEL EQUIPO CON FOTO E IMAGEN (MODAL)
+// MÓDULO 2: INTEGRANTES DEL EQUIPO CON ORDEN CIRCULAR 360°
 // =========================================================
 const TEAM_MEMBERS_DATA = [
   {
@@ -1655,51 +1680,115 @@ const TEAM_MEMBERS_DATA = [
   }
 ];
 
+let currentOrbitIndex = 0;
+let teamLayoutMode = 'circular'; // 'circular' o 'grid'
+
 function setupTeamMembersModal() {
   const btnOpen = document.getElementById('btnOpenTeamModal');
   const btnClose = document.getElementById('btnCloseTeamModal');
   const btnCloseBtn = document.getElementById('btnCloseTeamModalBtn');
   const modal = document.getElementById('modalTeamMembers');
-  const grid = document.getElementById('teamMembersGrid');
+  const orbitNodesContainer = document.getElementById('teamOrbitNodes');
+  const spotlightCard = document.getElementById('teamSpotlightCard');
+  const orbitDotsContainer = document.getElementById('teamOrbitDots');
+  const btnOrbitPrev = document.getElementById('btnOrbitPrev');
+  const btnOrbitNext = document.getElementById('btnOrbitNext');
+  const btnToggleLayout = document.getElementById('btnToggleTeamLayout');
+  const circularStage = document.getElementById('teamCircularStage');
+  const gridContainer = document.getElementById('teamMembersGrid');
 
-  if (!modal || !grid) return;
+  if (!modal) return;
 
-  const renderTeamMembers = () => {
-    grid.innerHTML = TEAM_MEMBERS_DATA.map((member, idx) => {
+  // Renderizar la Vista Circular Orbital (360 grados repartidos en 5 integrantes)
+  const renderCircularOrbit = () => {
+    if (!orbitNodesContainer) return;
+
+    // 5 nodos posicionados geométricamente en un círculo (72 grados cada uno)
+    // Comenzando en -90deg (arriba al centro para el líder Edgar)
+    const total = TEAM_MEMBERS_DATA.length;
+    const radius = 42; // radio en porcentaje
+
+    orbitNodesContainer.innerHTML = TEAM_MEMBERS_DATA.map((member, i) => {
+      const angleDeg = (360 / total) * i - 90;
+      const angleRad = (angleDeg * Math.PI) / 180;
+      const left = 50 + radius * Math.cos(angleRad);
+      const top = 50 + radius * Math.sin(angleRad);
+
       const customAvatar = localStorage.getItem(`team_avatar_${member.branch}`);
       const avatarSrc = customAvatar || member.defaultAvatar;
+      const isActive = i === currentOrbitIndex;
 
       return `
-        <div class="team-member-card">
-          <div class="team-avatar-wrap">
-            <img src="${escapeHtml(avatarSrc)}" 
-                 alt="${escapeHtml(member.name)}" 
-                 class="team-member-avatar" 
-                 id="avatar_img_${idx}"
-                 onerror="this.onerror=null; this.src='${escapeHtml(member.onlineFallback)}';">
-          </div>
-          <h4 class="team-member-name">${escapeHtml(member.name)}</h4>
-          <span class="team-member-branch"><i class="fa-solid fa-code-branch"></i> ${escapeHtml(member.branch)}</span>
-          <div class="team-member-role">${escapeHtml(member.role)}</div>
-          <div class="team-member-project">📝 ${escapeHtml(member.project)}</div>
-          
-          <div class="team-member-actions">
-            <button class="btn btn-secondary btn-sm btn-filter-member" data-member="${escapeHtml(member.name)}" title="Ver actividades de este integrante">
-              <i class="fa-solid fa-filter"></i> Actividades
-            </button>
-            <label class="btn btn-secondary btn-sm btn-change-avatar" title="Subir / Cambiar foto de este integrante">
-              <i class="fa-solid fa-camera"></i> Foto
-              <input type="file" accept="image/*" class="team-avatar-input" data-index="${idx}" data-branch="${escapeHtml(member.branch)}" style="display:none;">
-            </label>
-          </div>
-        </div>
+        <button type="button" 
+          class="team-orbit-node ${isActive ? 'active' : ''}" 
+          data-index="${i}" 
+          title="${escapeHtml(member.name)} (${escapeHtml(member.branch)})"
+          style="left: ${left.toFixed(2)}%; top: ${top.toFixed(2)}%;">
+          <img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(member.name)}" onerror="this.onerror=null; this.src='${escapeHtml(member.onlineFallback)}';">
+          <span class="node-num-badge">#${i + 1}</span>
+        </button>
       `;
     }).join('');
 
-    // Eventos: Filtrar actividades por integrante
-    grid.querySelectorAll('.btn-filter-member').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const memberName = btn.getAttribute('data-member');
+    // Indicadores circulares (dots)
+    if (orbitDotsContainer) {
+      orbitDotsContainer.innerHTML = TEAM_MEMBERS_DATA.map((m, i) => `
+        <span class="orbit-dot ${i === currentOrbitIndex ? 'active' : ''}" data-index="${i}"></span>
+      `).join('');
+
+      orbitDotsContainer.querySelectorAll('.orbit-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+          selectOrbitMember(Number(dot.getAttribute('data-index')));
+        });
+      });
+    }
+
+    // Eventos de clic en nodos orbitales
+    orbitNodesContainer.querySelectorAll('.team-orbit-node').forEach(node => {
+      node.addEventListener('click', () => {
+        const idx = Number(node.getAttribute('data-index'));
+        selectOrbitMember(idx);
+      });
+    });
+
+    renderSpotlightCard();
+  };
+
+  // Renderizar tarjeta destacada del integrante activo
+  const renderSpotlightCard = () => {
+    if (!spotlightCard) return;
+    const member = TEAM_MEMBERS_DATA[currentOrbitIndex];
+    const customAvatar = localStorage.getItem(`team_avatar_${member.branch}`);
+    const avatarSrc = customAvatar || member.defaultAvatar;
+
+    spotlightCard.innerHTML = `
+      <div class="spotlight-avatar-wrap">
+        <img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(member.name)}" class="spotlight-avatar-img" id="spotlightAvatarImg" onerror="this.onerror=null; this.src='${escapeHtml(member.onlineFallback)}';">
+      </div>
+      <div class="spotlight-info">
+        <div class="spotlight-header">
+          <h4 class="spotlight-name">${escapeHtml(member.name)}</h4>
+          <span class="spotlight-branch"><i class="fa-solid fa-code-branch"></i> ${escapeHtml(member.branch)}</span>
+        </div>
+        <div class="spotlight-role">${escapeHtml(member.role)}</div>
+        <div class="spotlight-project">📝 ${escapeHtml(member.project)}</div>
+        <div class="spotlight-actions">
+          <button class="btn btn-primary btn-sm btn-filter-spotlight" data-member="${escapeHtml(member.name)}">
+            <i class="fa-solid fa-filter"></i> Ver Actividades
+          </button>
+          <label class="btn btn-secondary btn-sm" title="Cambiar foto de este integrante">
+            <i class="fa-solid fa-camera"></i> Cambiar Foto
+            <input type="file" accept="image/*" class="spotlight-file-input" data-branch="${escapeHtml(member.branch)}" style="display:none;">
+          </label>
+        </div>
+      </div>
+    `;
+
+    // Filtro rápido
+    const btnFilter = spotlightCard.querySelector('.btn-filter-spotlight');
+    if (btnFilter) {
+      btnFilter.addEventListener('click', () => {
+        const memberName = btnFilter.getAttribute('data-member');
         closeTeamModal();
         if (dom.filterMember) {
           dom.filterMember.value = memberName;
@@ -1709,15 +1798,15 @@ function setupTeamMembersModal() {
           showToast(`Filtrando actividades de: ${memberName}`, 'info');
         }
       });
-    });
+    }
 
-    // Eventos: Cambiar foto personalizada con FileReader
-    grid.querySelectorAll('.team-avatar-input').forEach(input => {
-      input.addEventListener('change', (e) => {
+    // Subir foto personalizada
+    const fileInput = spotlightCard.querySelector('.spotlight-file-input');
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
-        const branch = input.getAttribute('data-branch');
-        const idx = input.getAttribute('data-index');
+        const branch = fileInput.getAttribute('data-branch');
 
         if (file.size > 2 * 1024 * 1024) {
           showToast('La imagen debe ser menor a 2 MB.', 'danger');
@@ -1729,20 +1818,97 @@ function setupTeamMembersModal() {
           const base64 = loadEvt.target.result;
           try {
             localStorage.setItem(`team_avatar_${branch}`, base64);
-            const imgEl = document.getElementById(`avatar_img_${idx}`);
-            if (imgEl) imgEl.src = base64;
-            showToast(`Foto actualizada con éxito para ${branch}.`, 'success');
-          } catch (storageErr) {
-            showToast('Almacenamiento local lleno para guardar foto.', 'danger');
+            showToast(`Foto actualizada para ${branch}.`, 'success');
+            renderCircularOrbit();
+            renderGridMembers();
+          } catch (err) {
+            showToast('Almacenamiento local lleno.', 'danger');
           }
         };
         reader.readAsDataURL(file);
       });
+    }
+  };
+
+  const selectOrbitMember = (index) => {
+    currentOrbitIndex = (index + TEAM_MEMBERS_DATA.length) % TEAM_MEMBERS_DATA.length;
+    renderCircularOrbit();
+  };
+
+  if (btnOrbitPrev) {
+    btnOrbitPrev.addEventListener('click', () => selectOrbitMember(currentOrbitIndex - 1));
+  }
+  if (btnOrbitNext) {
+    btnOrbitNext.addEventListener('click', () => selectOrbitMember(currentOrbitIndex + 1));
+  }
+
+  // Renderizar la Vista Cuadrícula Clásica (como respaldo)
+  const renderGridMembers = () => {
+    if (!gridContainer) return;
+    gridContainer.innerHTML = TEAM_MEMBERS_DATA.map((member, idx) => {
+      const customAvatar = localStorage.getItem(`team_avatar_${member.branch}`);
+      const avatarSrc = customAvatar || member.defaultAvatar;
+
+      return `
+        <div class="team-member-card">
+          <div class="team-avatar-wrap">
+            <img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(member.name)}" class="team-member-avatar" onerror="this.onerror=null; this.src='${escapeHtml(member.onlineFallback)}';">
+          </div>
+          <h4 class="team-member-name">${escapeHtml(member.name)}</h4>
+          <span class="team-member-branch"><i class="fa-solid fa-code-branch"></i> ${escapeHtml(member.branch)}</span>
+          <div class="team-member-role">${escapeHtml(member.role)}</div>
+          <div class="team-member-project">📝 ${escapeHtml(member.project)}</div>
+          
+          <div class="team-member-actions">
+            <button class="btn btn-secondary btn-sm btn-filter-member" data-member="${escapeHtml(member.name)}">
+              <i class="fa-solid fa-filter"></i> Actividades
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    gridContainer.querySelectorAll('.btn-filter-member').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const memberName = btn.getAttribute('data-member');
+        closeTeamModal();
+        if (dom.filterMember) {
+          dom.filterMember.value = memberName;
+          handleFilters();
+          const target = document.getElementById('activitiesGrid');
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          showToast(`Filtrando actividades de: ${memberName}`, 'info');
+        }
+      });
     });
   };
 
+  // Alternar entre Vista Circular y Cuadrícula
+  if (btnToggleLayout) {
+    btnToggleLayout.addEventListener('click', () => {
+      const icon = document.getElementById('iconTeamLayout');
+      const text = document.getElementById('textTeamLayout');
+      if (teamLayoutMode === 'circular') {
+        teamLayoutMode = 'grid';
+        if (circularStage) circularStage.style.display = 'none';
+        if (gridContainer) gridContainer.style.display = 'grid';
+        if (icon) icon.className = 'fa-solid fa-circle-notch';
+        if (text) text.textContent = 'Vista Circular 360°';
+        renderGridMembers();
+      } else {
+        teamLayoutMode = 'circular';
+        if (circularStage) circularStage.style.display = 'flex';
+        if (gridContainer) gridContainer.style.display = 'none';
+        if (icon) icon.className = 'fa-solid fa-table-cells';
+        if (text) text.textContent = 'Vista Cuadrícula';
+        renderCircularOrbit();
+      }
+    });
+  }
+
   const openTeamModal = () => {
-    renderTeamMembers();
+    renderCircularOrbit();
+    renderGridMembers();
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   };
@@ -1766,18 +1932,23 @@ function setupTeamMembersModal() {
     }
   });
 
-  renderTeamMembers();
+  renderCircularOrbit();
 }
 
 // =========================================================
-// MÓDULO 3: CONTROL DE ALMACENAMIENTO Y ESPACIO FIREBASE
+// MÓDULO 3: MONITOR Y AUDITORÍA PROFESIONAL DE FIREBASE
 // =========================================================
+let storageSearchQuery = '';
+let storageSortMode = 'size-desc';
+
 function setupFirebaseStorageModal() {
   const btnOpen = document.getElementById('btnOpenFirebaseModal');
   const btnClose = document.getElementById('btnCloseFirebaseModal');
   const btnCloseBtn = document.getElementById('btnCloseFirebaseModalBtn');
   const modal = document.getElementById('modalFirebaseStorage');
   const btnRecalc = document.getElementById('btnRecalculateStorage');
+  const searchInput = document.getElementById('storageTableSearch');
+  const sortSelect = document.getElementById('storageTableSort');
 
   if (!modal) return;
 
@@ -1806,84 +1977,170 @@ function setupFirebaseStorageModal() {
     }
   });
 
-  if (btnRecalc) {
-    btnRecalc.addEventListener('click', () => {
-      btnRecalc.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculando...';
-      setTimeout(() => {
-        updateStorageQuotaDisplay();
-        btnRecalc.innerHTML = '<i class="fa-solid fa-rotate"></i> Recalcular en Vivo';
-        showToast('Espacio y cuotas recalculadas en tiempo real.', 'success');
-      }, 400);
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      storageSearchQuery = e.target.value.toLowerCase().trim();
+      updateStorageQuotaDisplay();
     });
   }
 
-  // Actualización inicial de métricas
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      storageSortMode = e.target.value;
+      updateStorageQuotaDisplay();
+    });
+  }
+
+  if (btnRecalc) {
+    btnRecalc.addEventListener('click', () => {
+      btnRecalc.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Auditando...';
+      setTimeout(() => {
+        updateStorageQuotaDisplay();
+        btnRecalc.innerHTML = '<i class="fa-solid fa-rotate"></i> Recalcular';
+        showToast('Cuotas y métricas recalculadas en tiempo real.', 'success');
+      }, 350);
+    });
+  }
+
+  // Actualización inicial
   updateStorageQuotaDisplay();
 }
 
 function updateStorageQuotaDisplay() {
+  const gaugeFill = document.getElementById('storageGaugeFill');
+  const gaugePercent = document.getElementById('storageGaugePercent');
   const storageUsedMb = document.getElementById('storageUsedMb');
   const storageRemainingMb = document.getElementById('storageRemainingMb');
   const storagePercentLeft = document.getElementById('storagePercentLeft');
-  const storageProgressBar = document.getElementById('storageProgressBar');
-  const storagePercentText = document.getElementById('storagePercentText');
   const storageDocsCount = document.getElementById('storageDocsCount');
   const storagePdfsCount = document.getElementById('storagePdfsCount');
   const navStorageBadge = document.getElementById('navStorageBadge');
+  const segmentPdf = document.getElementById('storageSegmentPdf');
+  const segmentJson = document.getElementById('storageSegmentJson');
+  const segmentFree = document.getElementById('storageSegmentFree');
+  const legendPdf = document.getElementById('storageLegendPdfBytes');
+  const legendJson = document.getElementById('storageLegendJsonBytes');
   const tableBody = document.getElementById('storageBreakdownTableBody');
+  const countBadge = document.getElementById('storageTableCountBadge');
 
-  const SPARK_QUOTA_BYTES = 1024 * 1024 * 1024; // 1 GB = 1,024 MB = 1,073,741,824 bytes
-  const DOC_LIMIT_BYTES = 1024 * 1024; // 1 MB límite por documento en Firestore
+  const SPARK_QUOTA_BYTES = 1024 * 1024 * 1024; // 1 GB = 1,024 MB
+  const DOC_LIMIT_BYTES = 1024 * 1024; // 1 MB límite doc
 
   let totalBytes = 0;
+  let totalPdfBytes = 0;
+  let totalJsonBytes = 0;
   let pdfCount = 0;
   const activities = (allActivities && allActivities.length > 0) ? allActivities : [];
 
-  const breakdownRows = activities.map(act => {
-    let actBytes = 0;
+  // Calcular pesos
+  const enrichedActivities = activities.map(act => {
+    let jsonSize = 0;
     try {
-      actBytes = new Blob([JSON.stringify(act)]).size;
+      jsonSize = new Blob([JSON.stringify(act)]).size;
     } catch (e) {
-      actBytes = act.pdfSize || 1024;
+      jsonSize = 2048;
     }
 
-    if (act.pdfSize) {
-      actBytes = Math.max(actBytes, act.pdfSize);
-      pdfCount++;
-    }
-    totalBytes += actBytes;
+    const pdfSize = act.pdfSize || 0;
+    if (pdfSize > 0) pdfCount++;
 
-    const percentOfDocLimit = Math.min(100, ((actBytes / DOC_LIMIT_BYTES) * 100)).toFixed(1);
+    const totalActSize = Math.max(jsonSize, pdfSize);
+    totalPdfBytes += pdfSize;
+    totalJsonBytes += jsonSize;
+    totalBytes += totalActSize;
 
-    return `
-      <tr>
-        <td><strong>${escapeHtml(act.nombre)}</strong></td>
-        <td><i class="fa-solid fa-file-pdf text-accent"></i> ${escapeHtml(act.pdfName || 'documento.pdf')}</td>
-        <td>${formatBytes(actBytes)}</td>
-        <td>
-          <span class="anime-pill-badge-sm">${percentOfDocLimit}% de 1MB</span>
-        </td>
-      </tr>
-    `;
+    return {
+      activity: act,
+      sizeBytes: totalActSize,
+      pdfSize,
+      name: act.nombre || 'Sin nombre',
+      pdfName: act.pdfName || 'documento.pdf'
+    };
   });
 
-  const usedMb = (totalBytes / (1024 * 1024)).toFixed(2);
-  const remainingMb = ((SPARK_QUOTA_BYTES - totalBytes) / (1024 * 1024)).toFixed(1);
-  const percentUsed = Math.max(0.05, (totalBytes / SPARK_QUOTA_BYTES) * 100).toFixed(2);
-  const percentFree = (100 - parseFloat(percentUsed)).toFixed(1);
+  // Filtrado y ordenamiento de la tabla
+  let filtered = enrichedActivities.filter(item => {
+    if (!storageSearchQuery) return true;
+    return item.name.toLowerCase().includes(storageSearchQuery) || 
+           item.pdfName.toLowerCase().includes(storageSearchQuery);
+  });
 
+  if (storageSortMode === 'size-desc') {
+    filtered.sort((a, b) => b.sizeBytes - a.sizeBytes);
+  } else if (storageSortMode === 'size-asc') {
+    filtered.sort((a, b) => a.sizeBytes - b.sizeBytes);
+  } else if (storageSortMode === 'name-asc') {
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // Cálculos de cuota y porcentajes
+  const usedMb = (totalBytes / (1024 * 1024)).toFixed(2);
+  const remainingMb = Math.max(0, ((SPARK_QUOTA_BYTES - totalBytes) / (1024 * 1024))).toFixed(1);
+  const percentUsed = Math.max(0.05, (totalBytes / SPARK_QUOTA_BYTES) * 100);
+  const percentUsedFormatted = percentUsed < 0.1 ? percentUsed.toFixed(2) : percentUsed.toFixed(1);
+  const percentFree = (100 - percentUsed).toFixed(1);
+
+  // SVG Gauge Circular (Circunferencia = 2 * PI * 50 = 314.16)
+  const circumference = 314.16;
+  const strokeOffset = circumference * (1 - Math.min(1, Math.max(0.01, percentUsed / 100)));
+
+  if (gaugeFill) {
+    gaugeFill.style.strokeDashoffset = strokeOffset;
+    if (percentUsed > 85) {
+      gaugeFill.style.stroke = '#ef4444';
+    } else if (percentUsed > 60) {
+      gaugeFill.style.stroke = '#f59e0b';
+    } else {
+      gaugeFill.style.stroke = '#10b981';
+    }
+  }
+
+  if (gaugePercent) gaugePercent.textContent = `${percentUsedFormatted}%`;
   if (storageUsedMb) storageUsedMb.textContent = `${usedMb} MB`;
   if (storageRemainingMb) storageRemainingMb.textContent = `${remainingMb} MB`;
   if (storagePercentLeft) storagePercentLeft.textContent = `${percentFree}% de cuota libre`;
-  if (storagePercentText) storagePercentText.textContent = `${percentUsed}% utilizado`;
   if (storageDocsCount) storageDocsCount.textContent = activities.length;
   if (storagePdfsCount) storagePdfsCount.textContent = pdfCount;
-  if (storageProgressBar) storageProgressBar.style.width = `${Math.min(100, Math.max(1, percentUsed))}%`;
   if (navStorageBadge) navStorageBadge.textContent = `${Math.round(remainingMb)} MB libre`;
 
+  // Barra segmentada
+  const pdfPercent = Math.max(0.5, (totalPdfBytes / SPARK_QUOTA_BYTES) * 100);
+  const jsonPercent = Math.max(0.3, (totalJsonBytes / SPARK_QUOTA_BYTES) * 100);
+  const freePercent = Math.max(0, 100 - pdfPercent - jsonPercent);
+
+  if (segmentPdf) segmentPdf.style.width = `${pdfPercent.toFixed(2)}%`;
+  if (segmentJson) segmentJson.style.width = `${jsonPercent.toFixed(2)}%`;
+  if (segmentFree) segmentFree.style.width = `${freePercent.toFixed(2)}%`;
+  if (legendPdf) legendPdf.textContent = formatBytes(totalPdfBytes);
+  if (legendJson) legendJson.textContent = formatBytes(totalJsonBytes);
+  if (countBadge) countBadge.textContent = `${filtered.length} de ${activities.length} archivos`;
+
+  // Renderizar tabla interactiva
   if (tableBody) {
-    tableBody.innerHTML = breakdownRows.length > 0 ? breakdownRows.join('') : `
-      <tr><td colspan="4" class="text-center" style="padding:1.5rem; color:#94a3b8;">No hay actividades registradas aún.</td></tr>
-    `;
+    if (filtered.length === 0) {
+      tableBody.innerHTML = `
+        <tr><td colspan="5" class="text-center" style="padding:1.5rem; color:#94a3b8;">No se encontraron archivos que coincidan con la búsqueda.</td></tr>
+      `;
+    } else {
+      tableBody.innerHTML = filtered.map(item => {
+        const percentOfDoc = Math.min(100, ((item.sizeBytes / DOC_LIMIT_BYTES) * 100)).toFixed(1);
+        let statusBadge = '<span class="status-pill status-approved"><i class="fa-solid fa-check"></i> Óptimo</span>';
+        if (item.sizeBytes > 800000) {
+          statusBadge = '<span class="status-pill status-pending"><i class="fa-solid fa-triangle-exclamation"></i> Casi Lleno</span>';
+        }
+
+        return `
+          <tr>
+            <td><strong>${escapeHtml(item.name)}</strong></td>
+            <td><i class="fa-solid fa-file-pdf text-accent"></i> ${escapeHtml(item.pdfName)}</td>
+            <td><strong>${formatBytes(item.sizeBytes)}</strong></td>
+            <td>
+              <span class="anime-pill-badge-sm">${percentOfDoc}% de 1 MB</span>
+            </td>
+            <td>${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
   }
 }
