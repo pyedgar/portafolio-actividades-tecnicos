@@ -127,6 +127,10 @@ function isMobileDevice() {
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', async () => {
+  setupNavbarAutoHide();
+  setupPreferencesDrawer();
+  setupTeamMembersModal();
+  setupFirebaseStorageModal();
   setupAnimeVideoControls();
   setupAnimeCoverSelector();
   setupOtakuRadio();
@@ -142,18 +146,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.firebaseService.onActivitiesChanged(async (cloudList) => {
       console.log('🔄 Sincronización en tiempo real desde Firebase:', cloudList.length);
       await loadAndRenderActivities();
+      if (typeof updateStorageQuotaDisplay === 'function') {
+        updateStorageQuotaDisplay();
+      }
     });
   }
 });
 
-// Control del Video Anime Vertical y Ambiente (Pausa/Reanudar y Audio)
+// Auto-hide Navbar al hacer scroll hacia abajo para mayor comodidad
+function setupNavbarAutoHide() {
+  const navbar = document.querySelector('.navbar');
+  if (!navbar) return;
+
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        // Siempre visible al inicio de la página
+        if (currentScrollY <= 40) {
+          navbar.classList.remove('navbar-hidden');
+        } else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+          // Scroll hacia abajo: ocultar navbar y título para máxima inmersión
+          navbar.classList.add('navbar-hidden');
+        } else if (currentScrollY < lastScrollY) {
+          // Scroll hacia arriba: mostrar inmediatamente
+          navbar.classList.remove('navbar-hidden');
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+// Control del Video Anime Vertical y Ambiente (Pausa/Reanudar, 100% silencioso)
 function setupAnimeVideoControls() {
   const bgVideo = document.getElementById('bgVideo');
   const bgVideoAmbient = document.getElementById('bgVideoAmbient');
   const btnToggleVideoPlay = document.getElementById('btnToggleVideoPlay');
-  const btnToggleVideoAudio = document.getElementById('btnToggleVideoAudio');
 
   if (!bgVideo) return;
+
+  // El video de fondo permanece estrictamente silenciado (el audio viene de la Radio Otaku)
+  bgVideo.muted = true;
+  if (bgVideoAmbient) bgVideoAmbient.muted = true;
 
   const playVideos = () => {
     bgVideo.play().catch(() => {});
@@ -184,21 +226,6 @@ function setupAnimeVideoControls() {
         pauseVideos();
         btnToggleVideoPlay.innerHTML = '<i class="fa-solid fa-play"></i>';
         btnToggleVideoPlay.title = 'Reproducir video anime vertical';
-      }
-    });
-  }
-
-  if (btnToggleVideoAudio) {
-    btnToggleVideoAudio.addEventListener('click', () => {
-      bgVideo.muted = !bgVideo.muted;
-      if (bgVideo.muted) {
-        btnToggleVideoAudio.classList.remove('active-sound');
-        btnToggleVideoAudio.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> <span class="btn-label-mobile-hide">Audio BG</span>';
-        showToast('Audio de fondo silenciado.', 'info');
-      } else {
-        btnToggleVideoAudio.classList.add('active-sound');
-        btnToggleVideoAudio.innerHTML = '<i class="fa-solid fa-volume-high"></i> <span class="btn-label-mobile-hide">Audio ON</span>';
-        showToast('¡Audio de fondo activado!', 'success');
       }
     });
   }
@@ -1338,4 +1365,525 @@ function showToast(message, type = 'info') {
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
   }, 4000);
+}
+
+// =========================================================
+// MÓDULO 1: PREFERENCIAS DE TEMA Y COLORES (ESTILO OLYMPUS)
+// =========================================================
+const PREF_BG_PALETTE = [
+  { id: 'onyx', name: 'Negro Ónix', color: '#08040d', cardBg: '#120b1c' },
+  { id: 'midnight', name: 'Azul Noche', color: '#070d18', cardBg: '#0f172a' },
+  { id: 'otaku-purple', name: 'Púrpura Anime', color: '#100520', cardBg: '#1a0b33' },
+  { id: 'indigo', name: 'Índigo Profundo', color: '#090a1f', cardBg: '#13143d' },
+  { id: 'emerald', name: 'Cyber Esmeralda', color: '#041411', cardBg: '#09241e' },
+  { id: 'crimson', name: 'Carmesí Oscuro', color: '#18050c', cardBg: '#280915' },
+  { id: 'oled', name: 'Negro OLED', color: '#010102', cardBg: '#0c0c10' }
+];
+
+const PREF_ACCENT_PALETTE = [
+  { id: 'amber', name: 'Dorado / Ámbar', color: '#d4973b', glow: 'rgba(212, 151, 59, 0.45)' },
+  { id: 'yellow', name: 'Amarillo Neón', color: '#eab308', glow: 'rgba(234, 179, 8, 0.45)' },
+  { id: 'orange', name: 'Naranja Neón', color: '#f97316', glow: 'rgba(249, 115, 22, 0.45)' },
+  { id: 'coral', name: 'Rojo Carmesí', color: '#ff2e56', glow: 'rgba(255, 46, 86, 0.45)' },
+  { id: 'pink', name: 'Rosa Neón', color: '#ff2a85', glow: 'rgba(255, 42, 133, 0.45)' },
+  { id: 'magenta', name: 'Fucsia Magenta', color: '#ec4899', glow: 'rgba(236, 72, 153, 0.45)' },
+  { id: 'violet', name: 'Violeta Neón', color: '#a855f7', glow: 'rgba(168, 85, 247, 0.45)' },
+  { id: 'purple', name: 'Púrpura Lavanda', color: '#8b5cf6', glow: 'rgba(139, 92, 246, 0.45)' },
+  { id: 'periwinkle', name: 'Azul Periwinkle', color: '#6366f1', glow: 'rgba(99, 102, 241, 0.45)' },
+  { id: 'skyblue', name: 'Azul Cielo', color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.45)' },
+  { id: 'cyan', name: 'Cyan Eléctrico', color: '#00f0ff', glow: 'rgba(0, 240, 255, 0.45)' },
+  { id: 'mint', name: 'Menta / Esmeralda', color: '#10b981', glow: 'rgba(16, 185, 129, 0.45)' },
+  { id: 'lime', name: 'Verde Lima Neón', color: '#84cc16', glow: 'rgba(132, 204, 22, 0.45)' }
+];
+
+const PREF_STORAGE_KEY = 'portafolio_user_preferences_v1';
+
+let userPrefs = {
+  themeMode: 'dark',
+  bgId: 'onyx',
+  accentId: 'pink',
+  glowIntensity: 100
+};
+
+function setupPreferencesDrawer() {
+  const btnOpen = document.getElementById('btnOpenPreferences');
+  const btnClose = document.getElementById('btnClosePreferences');
+  const overlay = document.getElementById('preferencesOverlay');
+  const drawer = document.getElementById('preferencesDrawer');
+  const bgSwatches = document.getElementById('prefBgSwatches');
+  const accentSwatches = document.getElementById('prefAccentSwatches');
+  const glowSlider = document.getElementById('prefGlowSlider');
+  const prefGlowVal = document.getElementById('prefGlowVal');
+  const prefBgName = document.getElementById('prefBgName');
+  const prefColorName = document.getElementById('prefColorName');
+  const btnReset = document.getElementById('btnResetPreferences');
+  const themeButtons = document.querySelectorAll('.pref-theme-btn');
+
+  if (!drawer) return;
+
+  // Cargar preferencias guardadas
+  try {
+    const saved = localStorage.getItem(PREF_STORAGE_KEY);
+    if (saved) {
+      userPrefs = Object.assign(userPrefs, JSON.parse(saved));
+    }
+  } catch (e) {
+    console.warn('No se pudieron leer las preferencias guardadas', e);
+  }
+
+  // Renderizar swatches de fondo
+  if (bgSwatches) {
+    bgSwatches.innerHTML = PREF_BG_PALETTE.map(bg => `
+      <button type="button" class="pref-swatch-circle ${bg.id === userPrefs.bgId ? 'active' : ''}" 
+        data-bg-id="${bg.id}" 
+        title="${escapeHtml(bg.name)}" 
+        style="background-color: ${bg.color};">
+      </button>
+    `).join('');
+
+    bgSwatches.querySelectorAll('.pref-swatch-circle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const bgId = btn.getAttribute('data-bg-id');
+        userPrefs.bgId = bgId;
+        bgSwatches.querySelectorAll('.pref-swatch-circle').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyPreferences();
+      });
+    });
+  }
+
+  // Renderizar swatches de color de acento
+  if (accentSwatches) {
+    accentSwatches.innerHTML = PREF_ACCENT_PALETTE.map(acc => `
+      <button type="button" class="pref-swatch-circle ${acc.id === userPrefs.accentId ? 'active' : ''}" 
+        data-accent-id="${acc.id}" 
+        title="${escapeHtml(acc.name)}" 
+        style="background-color: ${acc.color}; color: ${acc.color};">
+      </button>
+    `).join('');
+
+    accentSwatches.querySelectorAll('.pref-swatch-circle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const accentId = btn.getAttribute('data-accent-id');
+        userPrefs.accentId = accentId;
+        accentSwatches.querySelectorAll('.pref-swatch-circle').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyPreferences();
+      });
+    });
+  }
+
+  // Manejar cambio de tema (Oscuro | Claro | Sistema)
+  themeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      themeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      userPrefs.themeMode = btn.getAttribute('data-theme-mode');
+      applyPreferences();
+    });
+  });
+
+  // Slider de brillo neón
+  if (glowSlider) {
+    glowSlider.value = userPrefs.glowIntensity || 100;
+    if (prefGlowVal) prefGlowVal.textContent = `${glowSlider.value}%`;
+    glowSlider.addEventListener('input', (e) => {
+      userPrefs.glowIntensity = Number(e.target.value);
+      if (prefGlowVal) prefGlowVal.textContent = `${userPrefs.glowIntensity}%`;
+      applyPreferences();
+    });
+  }
+
+  // Botón restablecer
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
+      userPrefs = {
+        themeMode: 'dark',
+        bgId: 'onyx',
+        accentId: 'pink',
+        glowIntensity: 100
+      };
+      if (glowSlider) glowSlider.value = 100;
+      if (prefGlowVal) prefGlowVal.textContent = '100%';
+      bgSwatches.querySelectorAll('.pref-swatch-circle').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-bg-id') === 'onyx');
+      });
+      accentSwatches.querySelectorAll('.pref-swatch-circle').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-accent-id') === 'pink');
+      });
+      themeButtons.forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-theme-mode') === 'dark');
+      });
+      applyPreferences();
+      showToast('Colores restablecidos a los valores anime originales.', 'info');
+    });
+  }
+
+  // Abrir y cerrar Drawer
+  const openDrawer = () => {
+    overlay.style.display = 'block';
+    setTimeout(() => drawer.classList.add('open'), 10);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeDrawer = () => {
+    drawer.classList.remove('open');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }, 300);
+  };
+
+  if (btnOpen) btnOpen.addEventListener('click', openDrawer);
+  if (btnClose) btnClose.addEventListener('click', closeDrawer);
+  if (overlay) overlay.addEventListener('click', closeDrawer);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.classList.contains('open')) {
+      closeDrawer();
+    }
+  });
+
+  // Aplicar preferencias iniciales
+  applyPreferences();
+}
+
+function applyPreferences() {
+  const root = document.documentElement;
+  const currentBg = PREF_BG_PALETTE.find(b => b.id === userPrefs.bgId) || PREF_BG_PALETTE[0];
+  const currentAccent = PREF_ACCENT_PALETTE.find(a => a.id === userPrefs.accentId) || PREF_ACCENT_PALETTE[4];
+
+  // Actualizar nombres en panel
+  const prefBgName = document.getElementById('prefBgName');
+  const prefColorName = document.getElementById('prefColorName');
+  if (prefBgName) prefBgName.textContent = currentBg.name;
+  if (prefColorName) prefColorName.textContent = currentAccent.name;
+
+  // Variables CSS dinámicas
+  const isLight = (userPrefs.themeMode === 'light') || 
+    (userPrefs.themeMode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+
+  if (isLight) {
+    root.style.setProperty('--bg-dark', '#f8fafc');
+    root.style.setProperty('--bg-card', '#ffffff');
+    root.style.setProperty('--bg-card-hover', '#f1f5f9');
+    root.style.setProperty('--text-primary', '#0f172a');
+    root.style.setProperty('--text-secondary', '#475569');
+    root.style.setProperty('--text-muted', '#64748b');
+    root.style.setProperty('--navbar-bg', 'rgba(255, 255, 255, 0.94)');
+    root.style.setProperty('--navbar-border', 'rgba(203, 213, 225, 0.8)');
+    root.style.setProperty('--drawer-bg', '#ffffff');
+    document.body.classList.add('theme-light');
+  } else {
+    root.style.setProperty('--bg-dark', currentBg.color);
+    root.style.setProperty('--bg-card', currentBg.cardBg);
+    root.style.setProperty('--bg-card-hover', '#1c1333');
+    root.style.setProperty('--text-primary', '#ffffff');
+    root.style.setProperty('--text-secondary', '#e2e8f0');
+    root.style.setProperty('--text-muted', '#94a3b8');
+    root.style.setProperty('--navbar-bg', `${currentBg.color}e6`);
+    root.style.setProperty('--navbar-border', `${currentAccent.color}55`);
+    root.style.setProperty('--drawer-bg', currentBg.cardBg);
+    document.body.classList.remove('theme-light');
+  }
+
+  root.style.setProperty('--color-primary', currentAccent.color);
+  root.style.setProperty('--color-primary-hover', currentAccent.color);
+  root.style.setProperty('--color-primary-glow', currentAccent.glow);
+  root.style.setProperty('--color-accent', currentAccent.color);
+
+  // Intensidad de resplandor neón
+  const glowFactor = (userPrefs.glowIntensity || 100) / 100;
+  root.style.setProperty('--anime-card-shadow', 
+    `0 8px 30px rgba(0, 0, 0, 0.75), 0 0 ${Math.round(18 * glowFactor)}px ${currentAccent.glow}, 0 0 ${Math.round(32 * glowFactor)}px rgba(168, 85, 247, ${0.2 * glowFactor})`
+  );
+
+  try {
+    localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify(userPrefs));
+  } catch (e) {}
+}
+
+// =========================================================
+// MÓDULO 2: INTEGRANTES DEL EQUIPO CON FOTO E IMAGEN (MODAL)
+// =========================================================
+const TEAM_MEMBERS_DATA = [
+  {
+    name: 'Edgar Reyes de la Cruz',
+    branch: 'EDGAR_REYES',
+    role: 'Líder de Proyecto • Arquitectura Web & Git',
+    project: 'Página personal, estructura del repositorio y calculadora técnica',
+    defaultAvatar: 'assets/images/team/edgar_reyes.jpg',
+    onlineFallback: 'https://github.com/pyedgar.png',
+    github: 'https://github.com/pyedgar',
+    theme: 'neon-purple'
+  },
+  {
+    name: 'Fátima Estefanía González Lozano',
+    branch: 'FATIMA_GONZALEZ',
+    role: 'Documentación & Portafolio de Evidencias',
+    project: 'Página personal, formatos de reporte y gestión de evidencias',
+    defaultAvatar: 'assets/images/team/fatima_gonzalez.png',
+    onlineFallback: 'assets/images/anime/anime_pin_2.png',
+    theme: 'neon-pink'
+  },
+  {
+    name: 'Kenia Isamara Andrade Cedillo',
+    branch: 'KENIA_ANDRADE',
+    role: 'Desarrollo & Calculadora Técnica',
+    project: 'Página personal y componentes de cálculo para cursos lunes',
+    defaultAvatar: 'assets/images/team/kenia_andrade.jpg',
+    onlineFallback: 'assets/images/anime/anime_neon_gojo_purple.jpg',
+    theme: 'neon-purple'
+  },
+  {
+    name: 'Ramiro Alejandro Alfaro Alanis',
+    branch: 'RAMIRO_ALFARO',
+    role: 'Desarrollo & Calculadora Técnica',
+    project: 'Página personal y validaciones técnicas de entrega',
+    defaultAvatar: 'assets/images/team/ramiro_alfaro.jpg',
+    onlineFallback: 'assets/images/anime/anime_card_1.jpg',
+    theme: 'neon-cyan'
+  },
+  {
+    name: 'Miguel Fuentes Hernández',
+    branch: 'MIGUEL_FUENTES',
+    role: 'Desarrollo & Componentes de Presentación',
+    project: 'Página personal y estilos visuales de interfaces',
+    defaultAvatar: 'assets/images/team/miguel_fuentes.jpg',
+    onlineFallback: 'assets/images/anime/anime_neon_samurai.jpg',
+    theme: 'neon-red'
+  }
+];
+
+function setupTeamMembersModal() {
+  const btnOpen = document.getElementById('btnOpenTeamModal');
+  const btnClose = document.getElementById('btnCloseTeamModal');
+  const btnCloseBtn = document.getElementById('btnCloseTeamModalBtn');
+  const modal = document.getElementById('modalTeamMembers');
+  const grid = document.getElementById('teamMembersGrid');
+
+  if (!modal || !grid) return;
+
+  const renderTeamMembers = () => {
+    grid.innerHTML = TEAM_MEMBERS_DATA.map((member, idx) => {
+      const customAvatar = localStorage.getItem(`team_avatar_${member.branch}`);
+      const avatarSrc = customAvatar || member.defaultAvatar;
+
+      return `
+        <div class="team-member-card">
+          <div class="team-avatar-wrap">
+            <img src="${escapeHtml(avatarSrc)}" 
+                 alt="${escapeHtml(member.name)}" 
+                 class="team-member-avatar" 
+                 id="avatar_img_${idx}"
+                 onerror="this.onerror=null; this.src='${escapeHtml(member.onlineFallback)}';">
+          </div>
+          <h4 class="team-member-name">${escapeHtml(member.name)}</h4>
+          <span class="team-member-branch"><i class="fa-solid fa-code-branch"></i> ${escapeHtml(member.branch)}</span>
+          <div class="team-member-role">${escapeHtml(member.role)}</div>
+          <div class="team-member-project">📝 ${escapeHtml(member.project)}</div>
+          
+          <div class="team-member-actions">
+            <button class="btn btn-secondary btn-sm btn-filter-member" data-member="${escapeHtml(member.name)}" title="Ver actividades de este integrante">
+              <i class="fa-solid fa-filter"></i> Actividades
+            </button>
+            <label class="btn btn-secondary btn-sm btn-change-avatar" title="Subir / Cambiar foto de este integrante">
+              <i class="fa-solid fa-camera"></i> Foto
+              <input type="file" accept="image/*" class="team-avatar-input" data-index="${idx}" data-branch="${escapeHtml(member.branch)}" style="display:none;">
+            </label>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Eventos: Filtrar actividades por integrante
+    grid.querySelectorAll('.btn-filter-member').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const memberName = btn.getAttribute('data-member');
+        closeTeamModal();
+        if (dom.filterMember) {
+          dom.filterMember.value = memberName;
+          handleFilters();
+          const target = document.getElementById('activitiesGrid');
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+          showToast(`Filtrando actividades de: ${memberName}`, 'info');
+        }
+      });
+    });
+
+    // Eventos: Cambiar foto personalizada con FileReader
+    grid.querySelectorAll('.team-avatar-input').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const branch = input.getAttribute('data-branch');
+        const idx = input.getAttribute('data-index');
+
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('La imagen debe ser menor a 2 MB.', 'danger');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (loadEvt) => {
+          const base64 = loadEvt.target.result;
+          try {
+            localStorage.setItem(`team_avatar_${branch}`, base64);
+            const imgEl = document.getElementById(`avatar_img_${idx}`);
+            if (imgEl) imgEl.src = base64;
+            showToast(`Foto actualizada con éxito para ${branch}.`, 'success');
+          } catch (storageErr) {
+            showToast('Almacenamiento local lleno para guardar foto.', 'danger');
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  };
+
+  const openTeamModal = () => {
+    renderTeamMembers();
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeTeamModal = () => {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  if (btnOpen) btnOpen.addEventListener('click', openTeamModal);
+  if (btnClose) btnClose.addEventListener('click', closeTeamModal);
+  if (btnCloseBtn) btnCloseBtn.addEventListener('click', closeTeamModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeTeamModal();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeTeamModal();
+    }
+  });
+
+  renderTeamMembers();
+}
+
+// =========================================================
+// MÓDULO 3: CONTROL DE ALMACENAMIENTO Y ESPACIO FIREBASE
+// =========================================================
+function setupFirebaseStorageModal() {
+  const btnOpen = document.getElementById('btnOpenFirebaseModal');
+  const btnClose = document.getElementById('btnCloseFirebaseModal');
+  const btnCloseBtn = document.getElementById('btnCloseFirebaseModalBtn');
+  const modal = document.getElementById('modalFirebaseStorage');
+  const btnRecalc = document.getElementById('btnRecalculateStorage');
+
+  if (!modal) return;
+
+  const openStorageModal = () => {
+    updateStorageQuotaDisplay();
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeStorageModal = () => {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  if (btnOpen) btnOpen.addEventListener('click', openStorageModal);
+  if (btnClose) btnClose.addEventListener('click', closeStorageModal);
+  if (btnCloseBtn) btnCloseBtn.addEventListener('click', closeStorageModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeStorageModal();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeStorageModal();
+    }
+  });
+
+  if (btnRecalc) {
+    btnRecalc.addEventListener('click', () => {
+      btnRecalc.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculando...';
+      setTimeout(() => {
+        updateStorageQuotaDisplay();
+        btnRecalc.innerHTML = '<i class="fa-solid fa-rotate"></i> Recalcular en Vivo';
+        showToast('Espacio y cuotas recalculadas en tiempo real.', 'success');
+      }, 400);
+    });
+  }
+
+  // Actualización inicial de métricas
+  updateStorageQuotaDisplay();
+}
+
+function updateStorageQuotaDisplay() {
+  const storageUsedMb = document.getElementById('storageUsedMb');
+  const storageRemainingMb = document.getElementById('storageRemainingMb');
+  const storagePercentLeft = document.getElementById('storagePercentLeft');
+  const storageProgressBar = document.getElementById('storageProgressBar');
+  const storagePercentText = document.getElementById('storagePercentText');
+  const storageDocsCount = document.getElementById('storageDocsCount');
+  const storagePdfsCount = document.getElementById('storagePdfsCount');
+  const navStorageBadge = document.getElementById('navStorageBadge');
+  const tableBody = document.getElementById('storageBreakdownTableBody');
+
+  const SPARK_QUOTA_BYTES = 1024 * 1024 * 1024; // 1 GB = 1,024 MB = 1,073,741,824 bytes
+  const DOC_LIMIT_BYTES = 1024 * 1024; // 1 MB límite por documento en Firestore
+
+  let totalBytes = 0;
+  let pdfCount = 0;
+  const activities = (allActivities && allActivities.length > 0) ? allActivities : [];
+
+  const breakdownRows = activities.map(act => {
+    let actBytes = 0;
+    try {
+      actBytes = new Blob([JSON.stringify(act)]).size;
+    } catch (e) {
+      actBytes = act.pdfSize || 1024;
+    }
+
+    if (act.pdfSize) {
+      actBytes = Math.max(actBytes, act.pdfSize);
+      pdfCount++;
+    }
+    totalBytes += actBytes;
+
+    const percentOfDocLimit = Math.min(100, ((actBytes / DOC_LIMIT_BYTES) * 100)).toFixed(1);
+
+    return `
+      <tr>
+        <td><strong>${escapeHtml(act.nombre)}</strong></td>
+        <td><i class="fa-solid fa-file-pdf text-accent"></i> ${escapeHtml(act.pdfName || 'documento.pdf')}</td>
+        <td>${formatBytes(actBytes)}</td>
+        <td>
+          <span class="anime-pill-badge-sm">${percentOfDocLimit}% de 1MB</span>
+        </td>
+      </tr>
+    `;
+  });
+
+  const usedMb = (totalBytes / (1024 * 1024)).toFixed(2);
+  const remainingMb = ((SPARK_QUOTA_BYTES - totalBytes) / (1024 * 1024)).toFixed(1);
+  const percentUsed = Math.max(0.05, (totalBytes / SPARK_QUOTA_BYTES) * 100).toFixed(2);
+  const percentFree = (100 - parseFloat(percentUsed)).toFixed(1);
+
+  if (storageUsedMb) storageUsedMb.textContent = `${usedMb} MB`;
+  if (storageRemainingMb) storageRemainingMb.textContent = `${remainingMb} MB`;
+  if (storagePercentLeft) storagePercentLeft.textContent = `${percentFree}% de cuota libre`;
+  if (storagePercentText) storagePercentText.textContent = `${percentUsed}% utilizado`;
+  if (storageDocsCount) storageDocsCount.textContent = activities.length;
+  if (storagePdfsCount) storagePdfsCount.textContent = pdfCount;
+  if (storageProgressBar) storageProgressBar.style.width = `${Math.min(100, Math.max(1, percentUsed))}%`;
+  if (navStorageBadge) navStorageBadge.textContent = `${Math.round(remainingMb)} MB libre`;
+
+  if (tableBody) {
+    tableBody.innerHTML = breakdownRows.length > 0 ? breakdownRows.join('') : `
+      <tr><td colspan="4" class="text-center" style="padding:1.5rem; color:#94a3b8;">No hay actividades registradas aún.</td></tr>
+    `;
+  }
 }

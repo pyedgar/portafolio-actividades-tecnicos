@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=20261026_card_fade">
+  <link rel="stylesheet" href="css/styles.css?v=20261026_features_v3">
 </head>
 <body class="anime-theme">
 
@@ -63,21 +63,32 @@
           <span class="radio-live-dot" id="radioLiveDot"></span>
         </button>
 
-        <!-- Controles de Video Anime de Fondo -->
-        <div class="video-media-controls" title="Control del Video Anime Vertical">
+        <!-- Botón Configurar Colores y Tema (Estilo Olympus) -->
+        <button id="btnOpenPreferences" class="btn btn-anime-pref" title="Personalizar Tema, Fondos y Colores Neón">
+          <i class="fa-solid fa-palette"></i>
+          <span>Colores</span>
+        </button>
+
+        <!-- Botón Integrantes del Equipo con Fotos -->
+        <button id="btnOpenTeamModal" class="btn btn-anime-team" title="Ver todos los integrantes oficiales del equipo con sus fotos">
+          <i class="fa-solid fa-users"></i>
+          <span>Equipo</span>
+        </button>
+
+        <!-- Botón Espacio y Cuota Firebase (No visible en la vista general, solo en este modal) -->
+        <button id="btnOpenFirebaseModal" class="btn btn-anime-cloud-storage" title="Control de Almacenamiento y Cuota Restante en Firebase">
+          <i class="fa-solid fa-server"></i>
+          <span>Espacio Cloud</span>
+          <span class="nav-storage-badge" id="navStorageBadge">1 GB</span>
+        </button>
+
+        <!-- Control de Pausa/Play de Video Anime (Audio removido, video 100% silencioso) -->
+        <div class="video-media-controls" title="Pausar o Reanudar Video Anime de Fondo">
           <button id="btnToggleVideoPlay" class="btn btn-anime-video" title="Pausar / Reproducir video vertical">
             <i class="fa-solid fa-pause"></i>
           </button>
-          <button id="btnToggleVideoAudio" class="btn btn-anime-video" title="Activar / Silenciar audio del video anime">
-            <i class="fa-solid fa-volume-xmark"></i>
-            <span class="btn-label-mobile-hide">Audio BG</span>
-          </button>
         </div>
 
-        <div class="cloud-status-badge" id="cloudStatusBadge" title="Estado de sincronización en Firebase">
-          <i class="fa-solid fa-cloud"></i>
-          <span id="cloudStatusText">Firebase Conectado</span>
-        </div>
         <button id="btnBackup" class="btn btn-secondary" title="Exportar o respaldar actividades">
           <i class="fa-solid fa-download"></i>
           <span>Respaldar</span>
@@ -578,6 +589,231 @@
     <span class="trigger-label">Radio Otaku</span>
   </button>
 
+  <!-- Drawer Lateral: Preferencias de Colores y Tema (Estilo Olympus Scanlation) -->
+  <div id="preferencesOverlay" class="drawer-overlay" style="display: none;"></div>
+  <aside id="preferencesDrawer" class="preferences-drawer" aria-label="Preferencias de Estilo y Color">
+    <div class="pref-header">
+      <div class="pref-title-wrap">
+        <i class="fa-solid fa-palette text-accent"></i>
+        <h3>Preferencias</h3>
+      </div>
+      <button id="btnClosePreferences" class="btn-close-drawer" title="Cerrar preferencias">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="pref-content">
+      <!-- Sección Tema: Oscuro | Claro | Sistema -->
+      <div class="pref-section">
+        <h4 class="pref-label">Tema</h4>
+        <div class="pref-theme-pills">
+          <button type="button" class="pref-theme-btn active" data-theme-mode="dark">
+            <i class="fa-solid fa-moon"></i> Oscuro
+          </button>
+          <button type="button" class="pref-theme-btn" data-theme-mode="light">
+            <i class="fa-solid fa-sun"></i> Claro
+          </button>
+          <button type="button" class="pref-theme-btn" data-theme-mode="system">
+            <i class="fa-solid fa-desktop"></i> Sistema
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección Fondo: Paleta de círculos -->
+      <div class="pref-section">
+        <div class="pref-section-title-row">
+          <h4 class="pref-label">Fondo</h4>
+          <span class="pref-current-value" id="prefBgName">Negro Ónix</span>
+        </div>
+        <div class="pref-swatches-row" id="prefBgSwatches">
+          <!-- Swatches de fondos generados por JS -->
+        </div>
+      </div>
+
+      <!-- Sección Color: Paleta de 13 colores vibrantes como en Olympus -->
+      <div class="pref-section">
+        <div class="pref-section-title-row">
+          <h4 class="pref-label">Color</h4>
+          <span class="pref-current-value" id="prefColorName">Rosa Neón</span>
+        </div>
+        <div class="pref-swatches-grid" id="prefAccentSwatches">
+          <!-- Swatches de color generados por JS -->
+        </div>
+      </div>
+
+      <!-- Sección Brillo Neón & Efectos -->
+      <div class="pref-section">
+        <div class="pref-section-title-row">
+          <h4 class="pref-label">Intensidad Neón</h4>
+          <span class="pref-current-value" id="prefGlowVal">100%</span>
+        </div>
+        <input type="range" id="prefGlowSlider" min="30" max="150" value="100" class="pref-slider">
+      </div>
+
+      <div class="pref-section pref-actions-section">
+        <button id="btnResetPreferences" class="btn btn-secondary btn-block">
+          <i class="fa-solid fa-rotate-left"></i> Restablecer Colores Originales
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Modal: Integrantes Oficiales del Equipo con Imagen (Los Técnicos) -->
+  <div id="modalTeamMembers" class="modal-backdrop" style="display: none;">
+    <div class="modal-window team-modal-window">
+      <div class="modal-header">
+        <div class="team-modal-title">
+          <div class="team-modal-badge">
+            <i class="fa-solid fa-dragon"></i>
+          </div>
+          <div>
+            <h3>Integrantes Oficiales • Los Técnicos</h3>
+            <p>技師チーム • Cursos Lunes • Universidad Tecnológica de Coahuila (UTC)</p>
+          </div>
+        </div>
+        <button id="btnCloseTeamModal" class="btn-close-modal" title="Cerrar ventana">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body team-modal-body">
+        <p class="team-modal-intro">
+          Equipo técnico oficial asignado para el desarrollo colaborativo del portafolio, estructuración de ramas Git (<code>NOMBRE_APELLIDO</code>) y documentación técnica:
+        </p>
+
+        <div class="team-members-grid" id="teamMembersGrid">
+          <!-- Se renderizan los 5 integrantes dinámicamente con foto, rama, rol, acciones -->
+        </div>
+      </div>
+
+      <div class="modal-footer team-modal-footer">
+        <div class="team-footer-meta">
+          <span><i class="fa-solid fa-code-branch text-purple"></i> 5 Ramas Oficiales en GitHub</span>
+          <span>•</span>
+          <span><i class="fa-brands fa-github text-pink"></i> pyedgar/portafolio-actividades-tecnicos</span>
+        </div>
+        <button id="btnCloseTeamModalBtn" class="btn btn-secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Control de Almacenamiento y Espacio Firebase (Plan Spark) -->
+  <div id="modalFirebaseStorage" class="modal-backdrop" style="display: none;">
+    <div class="modal-window storage-modal-window">
+      <div class="modal-header">
+        <div class="storage-modal-title">
+          <div class="storage-modal-badge">
+            <i class="fa-solid fa-server"></i>
+          </div>
+          <div>
+            <h3>Almacenamiento Firebase Firestore</h3>
+            <p>Monitoreo de Espacio y Cuota Gratuita (Plan Spark 100% Permanente)</p>
+          </div>
+        </div>
+        <button id="btnCloseFirebaseModal" class="btn-close-modal" title="Cerrar ventana">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body storage-modal-body">
+        
+        <!-- Tarjeta Principal de Cuota Restante -->
+        <div class="storage-hero-card">
+          <div class="storage-hero-row">
+            <div class="storage-hero-stat">
+              <span class="storage-hero-label">Espacio Restante Disponible</span>
+              <div class="storage-hero-number" id="storageRemainingMb">1,023.2 MB</div>
+              <span class="storage-hero-sub" id="storagePercentLeft">99.9% de cuota libre</span>
+            </div>
+            <div class="storage-hero-stat text-right">
+              <span class="storage-hero-label">Espacio Consumido</span>
+              <div class="storage-hero-number text-accent" id="storageUsedMb">0.8 MB</div>
+              <span class="storage-hero-sub" id="storageTotalQuota">Límite Total: 1,024 MB (1.0 GB)</span>
+            </div>
+          </div>
+
+          <!-- Barra de Progreso Neón -->
+          <div class="storage-progress-container">
+            <div class="storage-progress-bar" id="storageProgressBar" style="width: 1%;">
+              <div class="storage-progress-glow"></div>
+            </div>
+          </div>
+          <div class="storage-progress-labels">
+            <span>0 MB</span>
+            <span id="storagePercentText">0.1% utilizado</span>
+            <span>1,024 MB (1 GB)</span>
+          </div>
+        </div>
+
+        <!-- Métricas Rápidas del Plan Spark -->
+        <div class="storage-specs-grid">
+          <div class="spec-card">
+            <div class="spec-icon"><i class="fa-solid fa-database"></i></div>
+            <div class="spec-info">
+              <span class="spec-val" id="storageDocsCount">0</span>
+              <span class="spec-label">Documentos / Actividades</span>
+            </div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-icon"><i class="fa-solid fa-file-pdf"></i></div>
+            <div class="spec-info">
+              <span class="spec-val" id="storagePdfsCount">0</span>
+              <span class="spec-label">Archivos PDF Almacenados</span>
+            </div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="spec-info">
+              <span class="spec-val">50k / 20k</span>
+              <span class="spec-label">Lecturas / Escrituras al día</span>
+            </div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="spec-info">
+              <span class="spec-val" id="storageStatusText">En Línea</span>
+              <span class="spec-label">Estado de Sincronización</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla Desglose de Actividades y su Peso -->
+        <div class="storage-breakdown-section">
+          <div class="breakdown-header-row">
+            <h4><i class="fa-solid fa-chart-pie"></i> Desglose de Consumo por Actividad</h4>
+            <button id="btnRecalculateStorage" class="btn btn-secondary btn-sm" title="Recalcular espacio en tiempo real">
+              <i class="fa-solid fa-rotate"></i> Recalcular en Vivo
+            </button>
+          </div>
+          <div class="storage-table-wrapper">
+            <table class="storage-table">
+              <thead>
+                <tr>
+                  <th>Actividad</th>
+                  <th>Documento PDF</th>
+                  <th>Tamaño</th>
+                  <th>% del Límite (1MB/doc)</th>
+                </tr>
+              </thead>
+              <tbody id="storageBreakdownTableBody">
+                <!-- Filas dinámicas generadas por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer storage-modal-footer">
+        <div class="storage-guarantee-note">
+          <i class="fa-solid fa-circle-check text-emerald"></i> 
+          <span>Google Firebase Spark Plan • Gratuito de por vida sin cargos sorpresa.</span>
+        </div>
+        <button id="btnCloseFirebaseModalBtn" class="btn btn-secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Contenedor de Alertas Toast -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -598,8 +834,8 @@
   <!-- Firebase SDK (Compat v10) - 100% Gratuito sin tarjeta -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=20261026_card_fade"></script>
-  <script src="js/db.js?v=20261026_card_fade"></script>
-  <script src="js/app.js?v=20261026_card_fade"></script>
+  <script src="js/firebase-config.js?v=20261026_features_v3"></script>
+  <script src="js/db.js?v=20261026_features_v3"></script>
+  <script src="js/app.js?v=20261026_features_v3"></script>
 </body>
 </html>
