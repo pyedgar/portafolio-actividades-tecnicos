@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=20261026_features_v5">
+  <link rel="stylesheet" href="css/styles.css?v=20261026_features_v6">
 </head>
 <body class="anime-theme">
 
@@ -81,13 +81,6 @@
           <span>Espacio Cloud</span>
           <span class="nav-storage-badge" id="navStorageBadge">1 GB</span>
         </button>
-
-        <!-- Control de Pausa/Play de Video Anime (Audio removido, video 100% silencioso) -->
-        <div class="video-media-controls" title="Pausar o Reanudar Video Anime de Fondo">
-          <button id="btnToggleVideoPlay" class="btn btn-anime-video" title="Pausar / Reproducir video vertical">
-            <i class="fa-solid fa-pause"></i>
-          </button>
-        </div>
 
         <button id="btnBackup" class="btn btn-secondary" title="Exportar o respaldar actividades">
           <i class="fa-solid fa-download"></i>
@@ -619,6 +612,19 @@
         </div>
       </div>
 
+      <!-- Sección Estilo de Fondo: Video Anime con Filtro vs Color Sólido -->
+      <div class="pref-section">
+        <h4 class="pref-label">Estilo de Fondo</h4>
+        <div class="pref-theme-pills pref-bg-mode-pills">
+          <button type="button" class="pref-theme-btn pref-bg-mode-btn active" data-bg-mode="video">
+            <i class="fa-solid fa-film"></i> Video con Filtro
+          </button>
+          <button type="button" class="pref-theme-btn pref-bg-mode-btn" data-bg-mode="solid">
+            <i class="fa-solid fa-fill-drip"></i> Color Sólido
+          </button>
+        </div>
+      </div>
+
       <!-- Sección Fondo: Paleta de círculos -->
       <div class="pref-section">
         <div class="pref-section-title-row">
@@ -927,8 +933,8 @@
   <!-- Firebase SDK (Compat v10) - 100% Gratuito sin tarjeta -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=20261026_features_v5"></script>
-  <script src="js/db.js?v=20261026_features_v5"></script>
-  <script src="js/app.js?v=20261026_features_v5"></script>
+  <script src="js/firebase-config.js?v=20261026_features_v6"></script>
+  <script src="js/db.js?v=20261026_features_v6"></script>
+  <script src="js/app.js?v=20261026_features_v6"></script>
 </body>
 </html>

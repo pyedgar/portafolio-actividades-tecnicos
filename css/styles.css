@@ -2631,7 +2631,7 @@ body {
   gap: 0.25rem;
 }
 
-.pref-theme-btn {
+.pref-theme-btn, .pref-bg-mode-btn {
   flex: 1;
   background: transparent;
   border: none;
@@ -2648,15 +2648,15 @@ body {
   transition: all 0.2s ease;
 }
 
-.pref-theme-btn:hover {
+.pref-theme-btn:hover, .pref-bg-mode-btn:hover {
   color: #ffffff;
 }
 
-.pref-theme-btn.active {
-  background: var(--color-primary, #d4973b);
+.pref-theme-btn.active, .pref-bg-mode-btn.active {
+  background: var(--color-primary, #ff2a85);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 0 15px var(--color-primary-glow, rgba(212, 151, 59, 0.4));
+  box-shadow: 0 0 15px var(--color-primary-glow, rgba(255, 42, 133, 0.4));
 }
 
 /* Swatches de Fondo */

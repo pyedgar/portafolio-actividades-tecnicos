@@ -185,15 +185,14 @@ function setupNavbarAutoHide() {
   }, { passive: true });
 }
 
-// Control del Video Anime Vertical y Ambiente (Pausa/Reanudar, 100% silencioso)
+// Control del Video Anime Vertical y Ambiente (Autoplay 100% silencioso y fluido)
 function setupAnimeVideoControls() {
   const bgVideo = document.getElementById('bgVideo');
   const bgVideoAmbient = document.getElementById('bgVideoAmbient');
-  const btnToggleVideoPlay = document.getElementById('btnToggleVideoPlay');
 
   if (!bgVideo) return;
 
-  // El video de fondo permanece estrictamente silenciado (el audio viene de la Radio Otaku)
+  // El video de fondo permanece estrictamente silenciado (el audio proviene exclusivamente de la Radio Otaku)
   bgVideo.muted = true;
   if (bgVideoAmbient) bgVideoAmbient.muted = true;
 
@@ -202,33 +201,11 @@ function setupAnimeVideoControls() {
     if (bgVideoAmbient) bgVideoAmbient.play().catch(() => {});
   };
 
-  const pauseVideos = () => {
-    bgVideo.pause();
-    if (bgVideoAmbient) bgVideoAmbient.pause();
-  };
-
-  // Autoplay silencioso con reintento si el navegador restringe
-  const attemptPlay = () => {
+  // Autoplay silencioso con reintento si el navegador restringe inicialmente
+  playVideos();
+  window.addEventListener('click', () => {
     playVideos();
-    window.addEventListener('click', () => {
-      playVideos();
-    }, { once: true });
-  };
-  attemptPlay();
-
-  if (btnToggleVideoPlay) {
-    btnToggleVideoPlay.addEventListener('click', () => {
-      if (bgVideo.paused) {
-        playVideos();
-        btnToggleVideoPlay.innerHTML = '<i class="fa-solid fa-pause"></i>';
-        btnToggleVideoPlay.title = 'Pausar video anime vertical';
-      } else {
-        pauseVideos();
-        btnToggleVideoPlay.innerHTML = '<i class="fa-solid fa-play"></i>';
-        btnToggleVideoPlay.title = 'Reproducir video anime vertical';
-      }
-    });
-  }
+  }, { once: true });
 }
 
 // =========================================================
@@ -1400,6 +1377,7 @@ const PREF_STORAGE_KEY = 'portafolio_user_preferences_v2';
 
 let userPrefs = {
   themeMode: 'dark',
+  bgMode: 'video', // 'video' (con filtro de color y glassmorphism) | 'solid'
   bgId: 'onyx',
   accentId: 'pink',
   glowIntensity: 100
@@ -1417,7 +1395,8 @@ function setupPreferencesDrawer() {
   const prefBgName = document.getElementById('prefBgName');
   const prefColorName = document.getElementById('prefColorName');
   const btnReset = document.getElementById('btnResetPreferences');
-  const themeButtons = document.querySelectorAll('.pref-theme-btn');
+  const themeButtons = document.querySelectorAll('.pref-theme-btn:not(.pref-bg-mode-btn)');
+  const bgModeButtons = document.querySelectorAll('.pref-bg-mode-btn');
 
   if (!drawer) return;
 
@@ -1429,6 +1408,22 @@ function setupPreferencesDrawer() {
     }
   } catch (e) {
     console.warn('No se pudieron leer las preferencias guardadas', e);
+  }
+
+  // Inicializar estado del modo de fondo ('video' por defecto)
+  if (!userPrefs.bgMode) {
+    userPrefs.bgMode = 'video';
+  }
+  if (bgModeButtons.length > 0) {
+    bgModeButtons.forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-bg-mode') === userPrefs.bgMode);
+      b.addEventListener('click', () => {
+        bgModeButtons.forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+        userPrefs.bgMode = b.getAttribute('data-bg-mode') || 'video';
+        applyPreferences();
+      });
+    });
   }
 
   // Renderizar swatches de fondo
@@ -1499,6 +1494,7 @@ function setupPreferencesDrawer() {
     btnReset.addEventListener('click', () => {
       userPrefs = {
         themeMode: 'dark',
+        bgMode: 'video',
         bgId: 'onyx',
         accentId: 'pink',
         glowIntensity: 100
@@ -1514,6 +1510,11 @@ function setupPreferencesDrawer() {
       themeButtons.forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-theme-mode') === 'dark');
       });
+      if (bgModeButtons.length > 0) {
+        bgModeButtons.forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-bg-mode') === 'video');
+        });
+      }
       applyPreferences();
       showToast('Colores restablecidos a los valores anime originales.', 'info');
     });
@@ -1627,19 +1628,99 @@ function applyPreferences() {
   const cardBgCol = isLight ? '#ffffff' : currentBg.cardBg;
   const textCol = isLight ? '#0f172a' : '#f8fafc';
   const textMutedCol = isLight ? '#475569' : '#cbd5e1';
+  const isBgVideo = (userPrefs.bgMode !== 'solid');
+
+  // Controlar visibilidad y reproducción del video de fondo según modo seleccionado
+  const bgContainer = document.getElementById('animeVideoContainer');
+  const bgVideo = document.getElementById('bgVideo');
+  const bgVideoAmbient = document.getElementById('bgVideoAmbient');
+  if (bgContainer) {
+    if (isBgVideo) {
+      bgContainer.style.display = 'flex';
+      if (bgVideo && bgVideo.paused) bgVideo.play().catch(() => {});
+      if (bgVideoAmbient && bgVideoAmbient.paused) bgVideoAmbient.play().catch(() => {});
+    } else {
+      bgContainer.style.display = 'none';
+      if (bgVideo) bgVideo.pause();
+      if (bgVideoAmbient) bgVideoAmbient.pause();
+    }
+  }
 
   styleTag.textContent = `
-    /* Fondo General */
-    body, body.anime-theme, .main-content {
-      background-color: ${bgCol} !important;
-      color: ${textCol} !important;
-    }
-    .anime-video-bg-container {
-      background-color: ${bgCol} !important;
-    }
-    .anime-video-overlay {
-      background: radial-gradient(circle at 50% 50%, ${p}15 0%, ${bgCol}88 65%, ${bgCol} 100%) !important;
-    }
+    /* Fondo General y Video */
+    ${isBgVideo ? `
+      body, body.anime-theme, .main-content {
+        background-color: transparent !important;
+        background: transparent !important;
+        color: ${textCol} !important;
+      }
+      .anime-video-bg-container {
+        display: flex !important;
+        background-color: #06020c !important;
+      }
+      .anime-video-vertical-wrapper, .anime-video-ambient {
+        display: flex !important;
+      }
+      .anime-video-overlay {
+        display: block !important;
+        background: 
+          radial-gradient(circle at 50% 45%, ${p}38 0%, ${bgCol}60 55%, ${bgCol}cc 100%),
+          linear-gradient(180deg, ${p}24 0%, ${s}18 50%, ${bgCol}f2 100%) !important;
+        backdrop-filter: blur(0.5px) !important;
+        -webkit-backdrop-filter: blur(0.5px) !important;
+      }
+      .team-banner {
+        background: ${isLight ? 'rgba(255, 255, 255, 0.84)' : 'rgba(15, 10, 26, 0.75)'} !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        border-bottom-color: ${p}45 !important;
+      }
+      .activity-card {
+        background-color: ${isLight ? 'rgba(255, 255, 255, 0.88)' : (cardBgCol.startsWith('#') ? cardBgCol + 'c4' : 'rgba(18, 12, 30, 0.80)')} !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        border-color: ${p}45 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75), 0 0 ${Math.round(18 * glowFactor)}px ${glow} !important;
+      }
+      .stat-card {
+        background: ${isLight ? 'rgba(255, 255, 255, 0.86)' : 'rgba(18, 12, 30, 0.80)'} !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid ${p}35 !important;
+      }
+      .otaku-radio-widget {
+        background-color: ${isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(18, 12, 30, 0.88)'} !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+      }
+    ` : `
+      body, body.anime-theme, .main-content {
+        background-color: ${bgCol} !important;
+        color: ${textCol} !important;
+      }
+      .anime-video-bg-container {
+        display: none !important;
+      }
+      .anime-video-overlay {
+        display: none !important;
+      }
+      .team-banner {
+        background: linear-gradient(180deg, ${cardBgCol} 0%, ${bgCol} 100%) !important;
+        border-bottom-color: ${p}45 !important;
+      }
+      .activity-card {
+        background-color: ${cardBgCol} !important;
+        border-color: ${p}40 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 ${Math.round(18 * glowFactor)}px ${glow} !important;
+      }
+      .stat-card {
+        background: ${cardBgCol} !important;
+        border: 1px solid ${p}35 !important;
+      }
+      .otaku-radio-widget {
+        background-color: ${cardBgCol} !important;
+      }
+    `}
 
     /* Navbar */
     .navbar {
@@ -1685,11 +1766,7 @@ function applyPreferences() {
       box-shadow: 0 0 18px ${glow} !important;
     }
 
-    /* Banner del Equipo */
-    .team-banner {
-      background: linear-gradient(180deg, ${cardBgCol} 0%, ${bgCol} 100%) !important;
-      border-bottom-color: ${p}45 !important;
-    }
+    /* Elementos del Banner del Equipo */
     .banner-badge {
       background: ${p}20 !important;
       border-color: ${p}60 !important;
@@ -1700,12 +1777,6 @@ function applyPreferences() {
       box-shadow: 0 0 12px ${glow} !important;
     }
 
-    /* Cards de Actividades */
-    .activity-card {
-      background-color: ${cardBgCol} !important;
-      border-color: ${p}40 !important;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 ${Math.round(18 * glowFactor)}px ${glow} !important;
-    }
     .activity-card:hover {
       border-color: ${p} !important;
       box-shadow: 0 16px 45px rgba(0, 0, 0, 0.92), 0 0 ${Math.round(28 * glowFactor)}px ${glow}, 0 0 ${Math.round(50 * glowFactor)}px ${s}65 !important;
