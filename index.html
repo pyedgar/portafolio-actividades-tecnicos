@@ -167,7 +167,7 @@
           </div>
           <div>
             <h3>Nueva Actividad</h3>
-            <p>Registra la actividad y sube el archivo PDF para lectura</p>
+            <p>Registra la actividad y sube el archivo PDF o enlace de Google Drive</p>
           </div>
         </div>
         <button class="btn-close-modal" id="btnCloseModal" title="Cerrar ventana">
@@ -259,35 +259,61 @@
           </div>
         </div>
 
-        <!-- Subida de PDF -->
+        <!-- Subida de Documento (Local o Google Drive) -->
         <div class="form-group">
           <label class="form-label">
-            <span>Archivo PDF de la Actividad</span>
+            <span>Documento o Reporte</span>
             <span class="required">*</span>
           </label>
           
-          <div class="pdf-dropzone" id="pdfDropzone">
-            <input type="file" id="pdfFileInput" accept="application/pdf" style="display: none;">
-            
-            <div class="dropzone-idle" id="dropzoneIdle">
-              <div class="dropzone-icon">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-              </div>
-              <p class="dropzone-text">Arrastra y suelta tu archivo PDF aquí o <span class="highlight">haz clic para examinar</span></p>
-              <span class="dropzone-hint">Formatos soportados: PDF (.pdf) • Visualizable directamente en navegador</span>
-            </div>
+          <div class="doc-source-toggle">
+            <button type="button" class="btn-toggle-source active" id="btnSourceFile">
+              <i class="fa-solid fa-file-arrow-up"></i> Subir Archivo PDF
+            </button>
+            <button type="button" class="btn-toggle-source" id="btnSourceDrive">
+              <i class="fa-brands fa-google-drive"></i> Enlace de Google Drive
+            </button>
+          </div>
 
-            <div class="dropzone-selected" id="dropzoneSelected" style="display: none;">
-              <div class="selected-pdf-icon">
-                <i class="fa-solid fa-file-pdf"></i>
+          <!-- Opción 1: Archivo local / Drag & Drop -->
+          <div id="sectionSourceFile">
+            <div class="pdf-dropzone" id="pdfDropzone">
+              <input type="file" id="pdfFileInput" accept="application/pdf" style="display: none;">
+              
+              <div class="dropzone-idle" id="dropzoneIdle">
+                <div class="dropzone-icon">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <p class="dropzone-text">Arrastra y suelta tu archivo PDF aquí o <span class="highlight">haz clic para examinar</span></p>
+                <span class="dropzone-hint">Formatos soportados: PDF (.pdf) • Visualizable directamente en navegador</span>
               </div>
-              <div class="selected-pdf-details">
-                <strong id="selectedPdfName">archivo.pdf</strong>
-                <span id="selectedPdfSize">0 KB</span>
+
+              <div class="dropzone-selected" id="dropzoneSelected" style="display: none;">
+                <div class="selected-pdf-icon">
+                  <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div class="selected-pdf-details">
+                  <strong id="selectedPdfName">archivo.pdf</strong>
+                  <span id="selectedPdfSize">0 KB</span>
+                </div>
+                <button type="button" id="btnRemovePdf" class="btn-remove-file" title="Quitar archivo">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
               </div>
-              <button type="button" id="btnRemovePdf" class="btn-remove-file" title="Quitar archivo">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
+            </div>
+          </div>
+
+          <!-- Opción 2: Enlace de Google Drive -->
+          <div id="sectionSourceDrive" style="display: none;">
+            <div class="drive-input-box">
+              <div class="drive-icon-input">
+                <i class="fa-brands fa-google-drive"></i>
+              </div>
+              <input type="url" id="driveUrlInput" class="form-control" placeholder="Pega aquí el enlace de Google Drive (ej. https://drive.google.com/file/d/.../view)">
+            </div>
+            <div class="drive-helper-hint">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>En Google Drive: clic derecho en el PDF &gt; <strong>Compartir</strong> &gt; selecciona <strong>"Cualquier persona con el enlace puede ver"</strong> y copia el enlace.</span>
             </div>
           </div>
         </div>
@@ -365,7 +391,9 @@
       <p class="footer-links">
         <span><i class="fa-brands fa-github"></i> GitHub Pages</span>
         <span>•</span>
-        <span><i class="fa-solid fa-cloud text-emerald"></i> Firebase Cloud Firestore</span>
+        <span><i class="fa-solid fa-cloud text-emerald"></i> Firebase Cloud</span>
+        <span>•</span>
+        <span><i class="fa-brands fa-google-drive text-emerald"></i> Google Drive</span>
       </p>
     </div>
   </footer>
@@ -375,6 +403,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js?v=20261025"></script>
   <script src="js/db.js?v=20261025"></script>
-  <script src="js/app.js?v=20261025"></script>
+  <script src="js/app.js?v=20261025_drive"></script>
 </body>
 </html>

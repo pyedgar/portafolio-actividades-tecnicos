@@ -1,5 +1,5 @@
 /**
- * Aplicación de Portafolio de Actividades con Visor de PDF y Sincronización en la Nube
+ * Aplicación de Portafolio de Actividades con Visor de PDF, Sincronización en la Nube y Soporte para Google Drive
  * Integrantes oficiales del equipo Los Técnicos (Cursos Lunes - UTC)
  */
 
@@ -14,6 +14,7 @@ const OFFICIAL_MEMBERS = [
 let allActivities = [];
 let selectedPdfFile = null;
 let currentViewerBlobUrl = null;
+let currentDocSource = 'file'; // 'file' o 'drive'
 
 // Elementos DOM
 const dom = {
@@ -49,6 +50,13 @@ const dom = {
   btnDeselectAllMembers: document.getElementById('btnDeselectAllMembers'),
   extraMemberInput: document.getElementById('extraMemberInput'),
   btnAddExtraMember: document.getElementById('btnAddExtraMember'),
+
+  // Selector de Fuente de Documento
+  btnSourceFile: document.getElementById('btnSourceFile'),
+  btnSourceDrive: document.getElementById('btnSourceDrive'),
+  sectionSourceFile: document.getElementById('sectionSourceFile'),
+  sectionSourceDrive: document.getElementById('sectionSourceDrive'),
+  driveUrlInput: document.getElementById('driveUrlInput'),
 
   // Dropzone PDF
   pdfDropzone: document.getElementById('pdfDropzone'),
@@ -164,6 +172,12 @@ function setupEventListeners() {
     showToast('Fecha y hora actualizadas al momento actual.', 'info');
   });
 
+  // Alternar entre Archivo Local y Google Drive
+  if (dom.btnSourceFile && dom.btnSourceDrive) {
+    dom.btnSourceFile.addEventListener('click', () => setDocSource('file'));
+    dom.btnSourceDrive.addEventListener('click', () => setDocSource('drive'));
+  }
+
   // Acciones rápidas de integrantes
   dom.btnSelectAllMembers.addEventListener('click', () => {
     dom.membersCheckboxContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
@@ -263,6 +277,65 @@ function setupEventListeners() {
   dom.fileRestoreInput.addEventListener('change', importDatabase);
 }
 
+// Cambiar tipo de fuente de documento
+function setDocSource(type) {
+  currentDocSource = type;
+  if (type === 'drive') {
+    dom.btnSourceDrive.classList.add('active');
+    dom.btnSourceFile.classList.remove('active');
+    dom.sectionSourceDrive.style.display = 'block';
+    dom.sectionSourceFile.style.display = 'none';
+    dom.driveUrlInput.focus();
+  } else {
+    dom.btnSourceFile.classList.add('active');
+    dom.btnSourceDrive.classList.remove('active');
+    dom.sectionSourceFile.style.display = 'block';
+    dom.sectionSourceDrive.style.display = 'none';
+  }
+}
+
+// Convertir enlaces de Google Drive a formato embebible (/preview)
+function convertGoogleDriveUrl(url) {
+  if (!url) return null;
+  const trimmed = url.trim();
+
+  let fileId = null;
+  const matchFile = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchFile) {
+    fileId = matchFile[1];
+  } else {
+    const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (matchId) {
+      fileId = matchId[1];
+    } else {
+      const matchDoc = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (matchDoc) fileId = matchDoc[1];
+    }
+  }
+
+  if (fileId) {
+    return {
+      fileId,
+      previewUrl: `https://drive.google.com/file/d/${fileId}/preview`,
+      viewUrl: `https://drive.google.com/file/d/${fileId}/view?usp=sharing`,
+      downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`
+    };
+  }
+
+  // Si no se detectó ID pero parece enlace de Google, usarlo directamente
+  if (trimmed.includes('drive.google.com') || trimmed.includes('docs.google.com')) {
+    const preview = trimmed.replace(/\/view(\?.*)?$/, '/preview');
+    return {
+      fileId: 'drive',
+      previewUrl: preview,
+      viewUrl: trimmed,
+      downloadUrl: trimmed
+    };
+  }
+
+  return null;
+}
+
 // Manejar PDF seleccionado
 function handleSelectedPdf(file) {
   if (!file) return;
@@ -298,6 +371,7 @@ function addExtraMember() {
 // Modal Crear
 function openCreateModal() {
   setDefaultDateTime();
+  setDocSource('file');
   dom.modalCreateActivity.style.display = 'flex';
   dom.activityName.focus();
 }
@@ -306,6 +380,8 @@ function closeCreateModal() {
   dom.modalCreateActivity.style.display = 'none';
   dom.activityForm.reset();
   selectedPdfFile = null;
+  if (dom.driveUrlInput) dom.driveUrlInput.value = '';
+  setDocSource('file');
   dom.dropzoneIdle.style.display = 'block';
   dom.dropzoneSelected.style.display = 'none';
   renderMemberCheckboxes();
@@ -334,9 +410,42 @@ async function handleFormSubmit(e) {
     return;
   }
 
-  if (!selectedPdfFile) {
-    showToast('Debes subir un archivo PDF para la actividad.', 'danger');
-    return;
+  let pdfName = 'documento.pdf';
+  let pdfSize = 0;
+  let pdfType = 'application/pdf';
+  let pdfBlob = null;
+  let pdfUrl = null;
+  let isGoogleDrive = false;
+  let driveOriginalUrl = null;
+
+  if (currentDocSource === 'drive') {
+    const driveInputVal = dom.driveUrlInput.value.trim();
+    if (!driveInputVal) {
+      showToast('Por favor, pega el enlace de Google Drive.', 'danger');
+      dom.driveUrlInput.focus();
+      return;
+    }
+
+    const driveInfo = convertGoogleDriveUrl(driveInputVal);
+    if (!driveInfo) {
+      showToast('Enlace de Google Drive inválido. Asegúrate de copiar el enlace compartido.', 'danger');
+      return;
+    }
+
+    isGoogleDrive = true;
+    pdfUrl = driveInfo.previewUrl;
+    driveOriginalUrl = driveInputVal;
+    pdfName = `${nombre} (Google Drive)`;
+    pdfSize = 0;
+  } else {
+    if (!selectedPdfFile) {
+      showToast('Debes seleccionar un archivo PDF o elegir la opción de Google Drive.', 'danger');
+      return;
+    }
+    pdfName = selectedPdfFile.name;
+    pdfSize = selectedPdfFile.size;
+    pdfType = selectedPdfFile.type || 'application/pdf';
+    pdfBlob = selectedPdfFile;
   }
 
   const submitBtn = dom.activityForm.querySelector('button[type="submit"]');
@@ -357,11 +466,13 @@ async function handleFormSubmit(e) {
       grupo,
       descripcion,
       integrantes,
-      pdfName: selectedPdfFile.name,
-      pdfSize: selectedPdfFile.size,
-      pdfType: selectedPdfFile.type || 'application/pdf',
-      pdfBlob: selectedPdfFile,
-      pdfUrl: null,
+      pdfName,
+      pdfSize,
+      pdfType,
+      pdfBlob,
+      pdfUrl,
+      isGoogleDrive,
+      driveOriginalUrl,
       createdAt: new Date(fechaVal).getTime() || Date.now()
     };
 
@@ -375,7 +486,7 @@ async function handleFormSubmit(e) {
     updateFilterDropdowns();
     filterActivities();
 
-    showToast('¡Actividad y archivo PDF guardados correctamente!', 'success');
+    showToast('¡Actividad guardada y sincronizada correctamente!', 'success');
     closeCreateModal();
     await loadAndRenderActivities();
   } catch (error) {
@@ -496,7 +607,8 @@ function renderCards(list) {
 
   dom.activitiesGrid.innerHTML = list.map(activity => {
     const hasPdf = Boolean(activity.pdfName || activity.pdfBlob || activity.pdfUrl);
-    const pdfSizeText = activity.pdfSize ? formatBytes(activity.pdfSize) : 'Documento PDF';
+    const isDrive = Boolean(activity.isGoogleDrive || (activity.pdfUrl && activity.pdfUrl.includes('drive.google.com')));
+    const pdfSizeText = isDrive ? 'Google Drive' : (activity.pdfSize ? formatBytes(activity.pdfSize) : 'Documento PDF');
     const isMainGroup = activity.grupo && activity.grupo.includes('Los Técnicos');
 
     const memberPillsHtml = (activity.integrantes || []).map(m => `
@@ -533,10 +645,15 @@ function renderCards(list) {
           ${hasPdf ? `
             <div class="pdf-file-box">
               <div class="pdf-file-meta">
-                <i class="fa-solid fa-file-pdf pdf-icon-card"></i>
+                <i class="${isDrive ? 'fa-brands fa-google-drive text-emerald' : 'fa-solid fa-file-pdf'} pdf-icon-card"></i>
                 <div class="pdf-name-wrap">
-                  <span class="pdf-filename" title="${escapeHtml(activity.pdfName || 'Documento.pdf')}">${escapeHtml(activity.pdfName || 'Documento.pdf')}</span>
-                  <span class="pdf-filesize">${pdfSizeText}</span>
+                  <span class="pdf-filename" title="${escapeHtml(activity.pdfName || 'Documento.pdf')}">
+                    ${escapeHtml(activity.pdfName || 'Documento.pdf')}
+                  </span>
+                  <div style="display:flex; align-items:center; gap:0.4rem; margin-top:2px;">
+                    <span class="pdf-filesize">${pdfSizeText}</span>
+                    ${isDrive ? '<span class="badge-drive"><i class="fa-brands fa-google-drive"></i> Drive</span>' : ''}
+                  </div>
                 </div>
               </div>
             </div>
@@ -570,12 +687,13 @@ window.openPdfViewer = async function(activityId) {
   }
 
   let pdfSrc = null;
+  const isDrive = Boolean(activity.isGoogleDrive || (activity.pdfUrl && activity.pdfUrl.includes('drive.google.com')));
 
   if (activity.pdfBlob instanceof Blob) {
     currentViewerBlobUrl = URL.createObjectURL(activity.pdfBlob);
     pdfSrc = currentViewerBlobUrl;
   } else if (activity.pdfUrl) {
-    pdfSrc = encodeURI(activity.pdfUrl);
+    pdfSrc = activity.pdfUrl;
   }
 
   if (!pdfSrc) {
@@ -591,15 +709,17 @@ window.openPdfViewer = async function(activityId) {
 
   dom.pdfFrame.src = pdfSrc;
 
-  // Configurar descarga
-  dom.btnDownloadPdf.onclick = () => {
-    downloadFile(pdfSrc, activity.pdfName || 'actividad.pdf');
-  };
-
-  // Abrir en nueva pestaña
-  dom.btnOpenNewTab.onclick = () => {
-    window.open(pdfSrc, '_blank');
-  };
+  // Configurar descarga / abrir en pestaña
+  if (isDrive) {
+    const driveOpenUrl = activity.driveOriginalUrl || activity.pdfUrl.replace('/preview', '/view');
+    dom.btnDownloadPdf.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir en Google Drive';
+    dom.btnDownloadPdf.onclick = () => window.open(driveOpenUrl, '_blank');
+    dom.btnOpenNewTab.onclick = () => window.open(pdfSrc, '_blank');
+  } else {
+    dom.btnDownloadPdf.innerHTML = '<i class="fa-solid fa-download"></i> Descargar';
+    dom.btnDownloadPdf.onclick = () => downloadFile(pdfSrc, activity.pdfName || 'actividad.pdf');
+    dom.btnOpenNewTab.onclick = () => window.open(pdfSrc, '_blank');
+  }
 
   dom.modalPdfViewer.style.display = 'flex';
 };

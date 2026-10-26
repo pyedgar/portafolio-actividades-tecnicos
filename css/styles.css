@@ -1265,3 +1265,98 @@ body {
   color: #2563eb;
   border-color: rgba(59, 130, 246, 0.25);
 }
+
+
+/* Selector de fuente de documento (Local vs Google Drive) */
+.doc-source-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.btn-toggle-source {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-toggle-source:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-toggle-source.active {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.drive-input-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.65rem;
+  transition: var(--transition);
+}
+
+.drive-input-box:focus-within {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+.drive-icon-input {
+  font-size: 1.3rem;
+  color: #16a34a;
+  padding: 0 0.25rem;
+}
+
+.drive-input-box input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0.5rem 0.25rem;
+  width: 100%;
+  font-size: 0.88rem;
+}
+
+.drive-helper-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.drive-helper-hint i {
+  color: #2563eb;
+  margin-top: 0.15rem;
+}
+
+.badge-drive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}

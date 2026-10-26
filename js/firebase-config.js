@@ -63,6 +63,8 @@ window.firebaseService = {
         pdfSize: activity.pdfSize || 0,
         pdfType: activity.pdfType || 'application/pdf',
         pdfUrl: activity.pdfUrl || null,
+        isGoogleDrive: Boolean(activity.isGoogleDrive),
+        driveOriginalUrl: activity.driveOriginalUrl || null,
         pdfBase64: pdfBase64Cloud,
         createdAt: activity.createdAt || Date.now(),
         updatedAt: Date.now()
