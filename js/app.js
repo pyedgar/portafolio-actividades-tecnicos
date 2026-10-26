@@ -1,5 +1,5 @@
 /**
- * Aplicación de Portafolio de Actividades con Visor de PDF, Sincronización en la Nube y Soporte para Google Drive
+ * Aplicación de Portafolio de Actividades con Visor de PDF, Sincronización en la Nube y Soporte Móvil
  * Integrantes oficiales del equipo Los Técnicos (Cursos Lunes - UTC)
  */
 
@@ -76,6 +76,7 @@ const dom = {
   viewerMembers: document.getElementById('viewerMembers'),
   viewerGroup: document.getElementById('viewerGroup'),
   pdfFrame: document.getElementById('pdfFrame'),
+  viewerContainer: document.getElementById('viewerContainer'),
   btnDownloadPdf: document.getElementById('btnDownloadPdf'),
   btnOpenNewTab: document.getElementById('btnOpenNewTab'),
 
@@ -86,6 +87,11 @@ const dom = {
 
   toastContainer: document.getElementById('toastContainer')
 };
+
+// Detectar si el usuario está en un dispositivo móvil (Android / iOS)
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', async () => {
@@ -675,7 +681,7 @@ function renderCards(list) {
   }).join('');
 }
 
-// Abrir el visor de PDF
+// Abrir el visor de PDF con soporte optimizado para celulares y Google Drive
 window.openPdfViewer = async function(activityId) {
   const activity = allActivities.find(a => a.id === activityId);
   if (!activity) return;
@@ -707,9 +713,43 @@ window.openPdfViewer = async function(activityId) {
   dom.viewerGroup.textContent = activity.grupo || 'General';
   dom.viewerMembers.textContent = (activity.integrantes || []).join(', ');
 
-  dom.pdfFrame.src = pdfSrc;
+  // En celulares, los iframes con blobs locales son bloqueados por Android.
+  // Proporcionamos un contenedor adaptado si es móvil con botón grande de lectura nativa.
+  const mobile = isMobileDevice();
 
-  // Configurar descarga / abrir en pestaña
+  if (mobile && !isDrive) {
+    dom.viewerContainer.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:2rem; text-align:center; color:#f8fafc;">
+        <div style="font-size:3.5rem; color:#ef4444; margin-bottom:1rem;">
+          <i class="fa-solid fa-file-pdf"></i>
+        </div>
+        <h3 style="font-size:1.15rem; margin-bottom:0.5rem; color:#ffffff;">${escapeHtml(activity.pdfName || 'Documento PDF')}</h3>
+        <p style="font-size:0.85rem; color:#94a3b8; max-width:320px; margin-bottom:1.5rem; line-height:1.4;">
+          Para leerlo en tu celular sin restricciones, pulsa el botón para abrirlo en el visor nativo de tu teléfono.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:0.75rem; width:100%; max-width:280px;">
+          <button id="btnMobileOpen" class="btn btn-primary" style="padding:0.75rem 1.25rem; font-size:0.95rem; justify-content:center;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir en Lector del Celular
+          </button>
+          <button id="btnMobileDownload" class="btn btn-secondary" style="padding:0.65rem 1.25rem; font-size:0.9rem; justify-content:center;">
+            <i class="fa-solid fa-download"></i> Descargar Archivo
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btnMobileOpen').onclick = () => {
+      window.open(pdfSrc, '_blank');
+    };
+    document.getElementById('btnMobileDownload').onclick = () => {
+      downloadFile(pdfSrc, activity.pdfName || 'actividad.pdf');
+    };
+  } else {
+    // Computadora o enlace interactivo de Google Drive
+    dom.viewerContainer.innerHTML = `<iframe id="pdfFrame" src="${encodeURI(pdfSrc)}" frameborder="0"></iframe>`;
+  }
+
+  // Configurar botones de barra superior
   if (isDrive) {
     const driveOpenUrl = activity.driveOriginalUrl || activity.pdfUrl.replace('/preview', '/view');
     dom.btnDownloadPdf.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir en Google Drive';
@@ -727,7 +767,9 @@ window.openPdfViewer = async function(activityId) {
 // Cerrar el visor
 function closePdfViewer() {
   dom.modalPdfViewer.style.display = 'none';
-  dom.pdfFrame.src = 'about:blank';
+  if (dom.viewerContainer) {
+    dom.viewerContainer.innerHTML = '<iframe id="pdfFrame" src="about:blank" frameborder="0"></iframe>';
+  }
   if (currentViewerBlobUrl) {
     URL.revokeObjectURL(currentViewerBlobUrl);
     currentViewerBlobUrl = null;

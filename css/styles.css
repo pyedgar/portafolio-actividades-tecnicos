@@ -1360,3 +1360,45 @@ body {
   font-size: 0.72rem;
   font-weight: 600;
 }
+
+
+/* Optimización móvil para visor de PDF */
+@media (max-width: 768px) {
+  .viewer-window {
+    height: 100% !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+  
+  .viewer-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.65rem !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  .viewer-actions {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 0.5rem !important;
+  }
+
+  .viewer-actions .btn {
+    flex: 1;
+    font-size: 0.78rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .btn-close-viewer {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .viewer-meta-bar {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    overflow-x: auto;
+  }
+}
