@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css?v=20261026_features_v4">
+  <link rel="stylesheet" href="css/styles.css?v=20261026_features_v5">
 </head>
 <body class="anime-theme">
 
@@ -660,11 +660,11 @@
 
   <!-- Modal: Integrantes Oficiales del Equipo con Imagen y Orden Circular (Los Técnicos) -->
   <div id="modalTeamMembers" class="modal-backdrop" style="display: none;">
-    <div class="modal-window team-modal-window">
+    <div class="modal-card team-modal-card">
       <div class="modal-header">
-        <div class="team-modal-title">
-          <div class="team-modal-badge">
-            <i class="fa-solid fa-dragon"></i>
+        <div class="modal-title-group">
+          <div class="modal-title-icon anime-brand-glow">
+            <i class="fa-solid fa-users"></i>
           </div>
           <div>
             <h3>Integrantes Oficiales • Los Técnicos</h3>
@@ -684,7 +684,7 @@
 
       <div class="modal-body team-modal-body">
         <p class="team-modal-intro">
-          Equipo técnico oficial asignado para el desarrollo colaborativo del portafolio y estructuración de ramas Git (<code>NOMBRE_APELLIDO</code>):
+          Equipo técnico oficial asignado para el desarrollo colaborativo del portafolio y ramas Git (<code>NOMBRE_APELLIDO</code>):
         </p>
 
         <!-- Vista 1: ORDEN CIRCULAR INTERACTIVO (Orbital 360°) -->
@@ -742,15 +742,15 @@
 
   <!-- Modal: Control Profesional de Almacenamiento y Espacio Firebase (Plan Spark) -->
   <div id="modalFirebaseStorage" class="modal-backdrop" style="display: none;">
-    <div class="modal-window storage-modal-window">
+    <div class="modal-card storage-modal-card">
       <div class="modal-header">
-        <div class="storage-modal-title">
-          <div class="storage-modal-badge">
+        <div class="modal-title-group">
+          <div class="modal-title-icon anime-brand-glow">
             <i class="fa-solid fa-server"></i>
           </div>
           <div>
             <h3>Almacenamiento Firebase Firestore</h3>
-            <p>Control Profesional de Cuota y Monitoreo en la Nube (Plan Spark 100% Gratuito)</p>
+            <p>Monitoreo de Espacio y Cuota en la Nube (Plan Spark 100% Permanente)</p>
           </div>
         </div>
         <button id="btnCloseFirebaseModal" class="btn-close-modal" title="Cerrar ventana">
@@ -760,102 +760,81 @@
 
       <div class="modal-body storage-modal-body">
         
-        <!-- Tarjeta Principal con Indicador Circular SVG y Resumen Pro -->
-        <div class="storage-dashboard-hero">
-          <!-- Medidor Circular SVG Profesional -->
-          <div class="storage-gauge-col">
-            <div class="storage-circular-gauge">
-              <svg viewBox="0 0 120 120" class="gauge-svg">
-                <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
-                <circle class="gauge-fill" id="storageGaugeFill" cx="60" cy="60" r="50" style="stroke-dashoffset: 314;"></circle>
-              </svg>
-              <div class="gauge-content">
-                <span class="gauge-percent" id="storageGaugePercent">0.1%</span>
-                <span class="gauge-sub">Ocupado</span>
+        <!-- Tarjeta Principal de Cuota y Progreso -->
+        <div class="storage-dashboard-card">
+          <div class="storage-dash-top">
+            <div class="storage-dash-main">
+              <span class="storage-dash-tag"><i class="fa-solid fa-cloud text-emerald"></i> Google Firebase Plan Spark</span>
+              <div class="storage-dash-numbers">
+                <div class="storage-dash-stat">
+                  <span class="dash-num-val text-success" id="storageRemainingMb">1,023.2 MB</span>
+                  <span class="dash-num-label" id="storagePercentLeft">Espacio Disponible (99.9% libre)</span>
+                </div>
+                <div class="storage-dash-stat text-right">
+                  <span class="dash-num-val text-accent" id="storageUsedMb">0.8 MB</span>
+                  <span class="dash-num-label" id="storageTotalQuota">de 1,024 MB (1.0 GB)</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Métricas Destacadas de Espacio -->
-          <div class="storage-hero-details">
-            <div class="storage-status-pill-row">
-              <span class="storage-plan-pill"><i class="fa-solid fa-cloud text-emerald"></i> Plan Spark (Gratuito Permanente)</span>
-              <span class="storage-health-pill" id="storageHealthPill"><i class="fa-solid fa-circle-check"></i> Estado Óptimo</span>
+          <!-- Barra de Progreso Neón Pro -->
+          <div class="storage-pro-bar-wrap">
+            <div class="storage-pro-bar-track">
+              <div class="storage-pro-bar-fill" id="storageProBarFill" style="width: 1%;"></div>
             </div>
-
-            <div class="storage-big-metrics">
-              <div class="metric-item">
-                <span class="metric-label">Espacio Libre Restante</span>
-                <span class="metric-val text-success" id="storageRemainingMb">1,023.2 MB</span>
-                <span class="metric-caption" id="storagePercentLeft">99.9% de cuota libre</span>
-              </div>
-              <div class="metric-item">
-                <span class="metric-label">Espacio Utilizado</span>
-                <span class="metric-val text-accent" id="storageUsedMb">0.8 MB</span>
-                <span class="metric-caption" id="storageTotalQuota">de 1,024 MB (1.0 GB)</span>
-              </div>
-            </div>
-
-            <!-- Barra Segmentada Visual (Estilo Cloud Console) -->
-            <div class="storage-segmented-bar-wrap">
-              <div class="storage-segmented-bar">
-                <div class="segment-pdf" id="storageSegmentPdf" style="width: 1%;" title="Archivos PDF"></div>
-                <div class="segment-json" id="storageSegmentJson" style="width: 0.5%;" title="Metadatos JSON"></div>
-                <div class="segment-free" id="storageSegmentFree" style="width: 98.5%;" title="Espacio Libre"></div>
-              </div>
-              <div class="storage-segment-legend">
-                <span><i class="legend-dot dot-pdf"></i> PDFs (<strong id="storageLegendPdfBytes">0 MB</strong>)</span>
-                <span><i class="legend-dot dot-json"></i> Datos JSON (<strong id="storageLegendJsonBytes">0 KB</strong>)</span>
-                <span><i class="legend-dot dot-free"></i> Libre (<strong>1,024 MB</strong>)</span>
-              </div>
+            <div class="storage-pro-bar-info">
+              <span>0 MB</span>
+              <span id="storagePercentText" class="text-accent font-bold">0.1% ocupado</span>
+              <span>1,024 MB (1 GB Máx)</span>
             </div>
           </div>
         </div>
 
-        <!-- Tarjetas de Especificaciones y Operaciones Diarias -->
-        <div class="storage-specs-grid">
-          <div class="spec-card">
-            <div class="spec-icon"><i class="fa-solid fa-folder-tree"></i></div>
-            <div class="spec-info">
-              <span class="spec-val" id="storageDocsCount">0</span>
-              <span class="spec-label">Actividades Registradas</span>
+        <!-- Métricas Rápidas en Cuadrícula Estilo Proyecto -->
+        <div class="storage-specs-row">
+          <div class="storage-spec-box">
+            <i class="fa-solid fa-folder-tree"></i>
+            <div>
+              <strong id="storageDocsCount">0</strong>
+              <small>Actividades</small>
             </div>
           </div>
-          <div class="spec-card">
-            <div class="spec-icon"><i class="fa-solid fa-file-pdf"></i></div>
-            <div class="spec-info">
-              <span class="spec-val" id="storagePdfsCount">0</span>
-              <span class="spec-label">Documentos PDF en Nube</span>
+          <div class="storage-spec-box">
+            <i class="fa-solid fa-file-pdf"></i>
+            <div>
+              <strong id="storagePdfsCount">0</strong>
+              <small>Archivos PDF</small>
             </div>
           </div>
-          <div class="spec-card">
-            <div class="spec-icon"><i class="fa-solid fa-bolt"></i></div>
-            <div class="spec-info">
-              <span class="spec-val">50k / 20k</span>
-              <span class="spec-label">Lecturas / Escrituras al día</span>
+          <div class="storage-spec-box">
+            <i class="fa-solid fa-bolt"></i>
+            <div>
+              <strong>50k / 20k</strong>
+              <small>Lecturas / Escrituras al día</small>
             </div>
           </div>
-          <div class="spec-card">
-            <div class="spec-icon"><i class="fa-solid fa-file-shield"></i></div>
-            <div class="spec-info">
-              <span class="spec-val">1 MB / doc</span>
-              <span class="spec-label">Límite por Documento</span>
+          <div class="storage-spec-box">
+            <i class="fa-solid fa-file-shield"></i>
+            <div>
+              <strong>1 MB</strong>
+              <small>Límite por Doc</small>
             </div>
           </div>
         </div>
 
         <!-- Auditoría y Filtros de Actividades por Peso -->
-        <div class="storage-breakdown-section">
-          <div class="breakdown-header-row">
-            <div class="breakdown-title-wrap">
-              <h4><i class="fa-solid fa-table-list text-accent"></i> Auditoría de Archivos y Consumo</h4>
+        <div class="storage-audit-section">
+          <div class="storage-audit-header">
+            <div class="storage-audit-title">
+              <h4><i class="fa-solid fa-table-list"></i> Auditoría de Archivos</h4>
               <span class="storage-count-badge" id="storageTableCountBadge">0 archivos</span>
             </div>
             
-            <div class="breakdown-actions-row">
+            <div class="storage-audit-tools">
               <div class="storage-table-search">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="storageTableSearch" placeholder="Buscar por nombre o archivo...">
+                <input type="text" id="storageTableSearch" placeholder="Buscar actividad o PDF...">
               </div>
               <select id="storageTableSort" class="form-control form-control-sm storage-sort-select">
                 <option value="size-desc">Mayor tamaño</option>
@@ -875,7 +854,7 @@
                   <th>Actividad</th>
                   <th>Archivo PDF</th>
                   <th>Tamaño</th>
-                  <th>% del Límite Doc (1 MB)</th>
+                  <th>% del Límite (1 MB)</th>
                   <th>Estado</th>
                 </tr>
               </thead>
@@ -890,8 +869,8 @@
 
       <div class="modal-footer storage-modal-footer">
         <div class="storage-guarantee-note">
-          <i class="fa-solid fa-shield-check text-emerald"></i> 
-          <span>Google Firebase Spark Plan: 100% Gratuito y permanente sin riesgo de cobro.</span>
+          <i class="fa-solid fa-shield-halved text-emerald"></i> 
+          <span>Google Firebase Spark Plan: 100% Gratuito permanente sin cargos sorpresa.</span>
         </div>
         <button id="btnCloseFirebaseModalBtn" class="btn btn-secondary">Cerrar</button>
       </div>
@@ -918,8 +897,8 @@
   <!-- Firebase SDK (Compat v10) - 100% Gratuito sin tarjeta -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=20261026_features_v4"></script>
-  <script src="js/db.js?v=20261026_features_v4"></script>
-  <script src="js/app.js?v=20261026_features_v4"></script>
+  <script src="js/firebase-config.js?v=20261026_features_v5"></script>
+  <script src="js/db.js?v=20261026_features_v5"></script>
+  <script src="js/app.js?v=20261026_features_v5"></script>
 </body>
 </html>

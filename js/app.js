@@ -1615,13 +1615,175 @@ function applyPreferences() {
   // Gradiente global
   root.style.setProperty('--anime-gradient-main', `linear-gradient(135deg, ${p}, ${s})`);
 
-  // Intensidad de resplandor neón en tarjetas
-  root.style.setProperty('--anime-card-shadow', 
-    `0 10px 30px rgba(0, 0, 0, 0.8), 0 0 ${Math.round(18 * glowFactor)}px ${glow}, 0 0 ${Math.round(35 * glowFactor)}px ${s}40`
-  );
-  root.style.setProperty('--anime-card-shadow-hover', 
-    `0 16px 45px rgba(0, 0, 0, 0.92), 0 0 ${Math.round(28 * glowFactor)}px ${glow}, 0 0 ${Math.round(50 * glowFactor)}px ${s}75`
-  );
+  // Inyección dinámica exhaustiva para aplicar a TODO el código (Fondo, Botones, Texto, Cards, Modales)
+  let styleTag = document.getElementById('themeDynamicOverride');
+  if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = 'themeDynamicOverride';
+    document.head.appendChild(styleTag);
+  }
+
+  const bgCol = isLight ? '#f8fafc' : currentBg.color;
+  const cardBgCol = isLight ? '#ffffff' : currentBg.cardBg;
+  const textCol = isLight ? '#0f172a' : '#f8fafc';
+  const textMutedCol = isLight ? '#475569' : '#cbd5e1';
+
+  styleTag.textContent = `
+    /* Fondo General */
+    body, body.anime-theme, .main-content {
+      background-color: ${bgCol} !important;
+      color: ${textCol} !important;
+    }
+    .anime-video-bg-container {
+      background-color: ${bgCol} !important;
+    }
+    .anime-video-overlay {
+      background: radial-gradient(circle at 50% 50%, ${p}15 0%, ${bgCol}88 65%, ${bgCol} 100%) !important;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: ${isLight ? 'rgba(255, 255, 255, 0.96)' : bgCol + 'ee'} !important;
+      border-bottom-color: ${p}55 !important;
+    }
+    .brand-text h1 {
+      color: ${textCol} !important;
+      text-shadow: 0 0 12px ${glow} !important;
+    }
+    .anime-brand-glow, .modal-title-icon {
+      background: linear-gradient(135deg, ${p}, ${s}) !important;
+      box-shadow: 0 0 16px ${glow}, 0 0 28px ${s}50 !important;
+    }
+    .anime-pill-badge, .anime-glow-badge, .badge-anime {
+      background: ${p}22 !important;
+      border-color: ${p}66 !important;
+      color: ${p} !important;
+    }
+
+    /* Botones Principales */
+    .btn-primary, .btn-anime-glow {
+      background: linear-gradient(135deg, ${p} 0%, ${s} 100%) !important;
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.35) !important;
+      box-shadow: 0 4px 18px ${glow}, 0 0 25px ${s}45 !important;
+    }
+    .btn-primary:hover, .btn-anime-glow:hover {
+      background: linear-gradient(135deg, ${t} 0%, ${p} 100%) !important;
+      box-shadow: 0 6px 24px ${glow}, 0 0 35px ${s}75 !important;
+    }
+
+    /* Botones Secundarios */
+    .btn-secondary:hover {
+      border-color: ${p} !important;
+      color: ${p} !important;
+      box-shadow: 0 0 12px ${glow} !important;
+    }
+
+    /* Botones de Navegación */
+    .btn-anime-radio:hover, .btn-anime-pref:hover, .btn-anime-team:hover, .btn-anime-cloud-storage:hover {
+      border-color: ${p} !important;
+      box-shadow: 0 0 18px ${glow} !important;
+    }
+
+    /* Banner del Equipo */
+    .team-banner {
+      background: linear-gradient(180deg, ${cardBgCol} 0%, ${bgCol} 100%) !important;
+      border-bottom-color: ${p}45 !important;
+    }
+    .banner-badge {
+      background: ${p}20 !important;
+      border-color: ${p}60 !important;
+      color: ${p} !important;
+    }
+    .team-chip:hover {
+      border-color: ${p} !important;
+      box-shadow: 0 0 12px ${glow} !important;
+    }
+
+    /* Cards de Actividades */
+    .activity-card {
+      background-color: ${cardBgCol} !important;
+      border-color: ${p}40 !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 ${Math.round(18 * glowFactor)}px ${glow} !important;
+    }
+    .activity-card:hover {
+      border-color: ${p} !important;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.92), 0 0 ${Math.round(28 * glowFactor)}px ${glow}, 0 0 ${Math.round(50 * glowFactor)}px ${s}65 !important;
+    }
+    .card-title {
+      color: ${textCol} !important;
+    }
+    .card-anime-gradient {
+      background: linear-gradient(180deg, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.4) 60%, ${cardBgCol} 100%) !important;
+    }
+
+    /* Modales */
+    .modal-card {
+      background-color: ${cardBgCol} !important;
+      border-color: ${p}55 !important;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px ${glow} !important;
+    }
+    .modal-header, .modal-footer {
+      background-color: rgba(0, 0, 0, 0.25) !important;
+      border-color: ${p}35 !important;
+    }
+    .modal-header h3 {
+      color: ${textCol} !important;
+    }
+
+    /* Inputs de Búsqueda y Filtros */
+    .search-box:focus-within, .filter-group select:focus, .storage-table-search input:focus {
+      border-color: ${p} !important;
+      box-shadow: 0 0 15px ${glow} !important;
+    }
+
+    /* Radio Otaku */
+    .otaku-radio-widget {
+      background-color: ${cardBgCol} !important;
+      border-color: ${p}55 !important;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.8), 0 0 25px ${glow} !important;
+    }
+    .radio-progress-fill, .btn-radio-play {
+      background: linear-gradient(135deg, ${p}, ${s}) !important;
+    }
+    .radio-eq-bars span {
+      background: ${p} !important;
+    }
+    .floating-radio-trigger {
+      background: linear-gradient(135deg, ${p}, ${s}) !important;
+      box-shadow: 0 4px 18px ${glow} !important;
+    }
+
+    /* Textos y Acentos */
+    .text-accent, .dash-num-val.text-accent {
+      color: ${p} !important;
+    }
+    a:hover {
+      color: ${p} !important;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, ${p}, ${s}) !important;
+    }
+
+    /* Tipografía Global adaptativa */
+    ${isLight ? `
+      body, .brand-text span, .banner-content p, .activity-card p, .card-body p, .stat-label, td, th {
+        color: #1e293b !important;
+      }
+      .brand-text h1, h2, h3, h4, strong {
+        color: #0f172a !important;
+      }
+    ` : `
+      body, .brand-text span, .banner-content p, .activity-card p, .card-body p, .stat-label, td, th {
+        color: #e2e8f0 !important;
+      }
+      .brand-text h1, h2, h3, h4, strong {
+        color: #ffffff !important;
+      }
+    `}
+  `;
 
   try {
     localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify(userPrefs));
@@ -2098,10 +2260,15 @@ function updateStorageQuotaDisplay() {
   if (gaugePercent) gaugePercent.textContent = `${percentUsedFormatted}%`;
   if (storageUsedMb) storageUsedMb.textContent = `${usedMb} MB`;
   if (storageRemainingMb) storageRemainingMb.textContent = `${remainingMb} MB`;
-  if (storagePercentLeft) storagePercentLeft.textContent = `${percentFree}% de cuota libre`;
+  if (storagePercentLeft) storagePercentLeft.textContent = `Espacio Disponible (${percentFree}% libre)`;
   if (storageDocsCount) storageDocsCount.textContent = activities.length;
   if (storagePdfsCount) storagePdfsCount.textContent = pdfCount;
   if (navStorageBadge) navStorageBadge.textContent = `${Math.round(remainingMb)} MB libre`;
+
+  const proBarFill = document.getElementById('storageProBarFill');
+  const percentText = document.getElementById('storagePercentText');
+  if (proBarFill) proBarFill.style.width = `${Math.min(100, Math.max(1, percentUsed)).toFixed(2)}%`;
+  if (percentText) percentText.textContent = `${percentUsedFormatted}% ocupado`;
 
   // Barra segmentada
   const pdfPercent = Math.max(0.5, (totalPdfBytes / SPARK_QUOTA_BYTES) * 100);
