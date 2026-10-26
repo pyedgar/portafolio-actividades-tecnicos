@@ -876,7 +876,7 @@ body {
 }
 
 /* =========================================================
-   PORTADA ANIME EN CADA CARD DE ACTIVIDAD
+   PORTADA ANIME EN CADA CARD DE ACTIVIDAD (AMPLIADA Y DIFUMINADA)
    ========================================================= */
 .card-anime-header {
   position: relative;
@@ -884,32 +884,43 @@ body {
   margin-top: -1.35rem;
   margin-left: -1.35rem;
   margin-right: -1.35rem;
-  margin-bottom: 1.15rem;
-  height: 175px;
+  margin-bottom: 0.65rem;
+  height: 240px; /* Tamaño ampliado para destacar el arte anime */
   overflow: hidden;
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
   background-color: #120c22;
+  
+  /* Difuminado suave y gradual al final de la foto hacia el cuerpo de la card */
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 55%, rgba(0, 0, 0, 0.75) 76%, rgba(0, 0, 0, 0.25) 92%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 55%, rgba(0, 0, 0, 0.75) 76%, rgba(0, 0, 0, 0.25) 92%, rgba(0, 0, 0, 0) 100%);
 }
 
 .card-anime-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 25%;
+  object-position: center 20%;
   transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
-  filter: brightness(0.92) contrast(1.1);
+  filter: brightness(0.95) contrast(1.12);
 }
 
 .activity-card:hover .card-anime-img {
   transform: scale(1.08);
-  filter: brightness(1.05) contrast(1.18) saturate(1.15);
+  filter: brightness(1.06) contrast(1.18) saturate(1.18);
 }
 
 .card-anime-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(14, 9, 26, 0.15) 0%, rgba(18, 12, 33, 0.55) 60%, rgba(18, 12, 33, 0.98) 100%);
+  background: linear-gradient(
+    180deg, 
+    rgba(14, 9, 26, 0.02) 0%, 
+    rgba(18, 12, 33, 0.12) 40%, 
+    rgba(18, 12, 33, 0.55) 72%, 
+    rgba(18, 12, 33, 0.92) 94%, 
+    rgba(18, 12, 33, 1) 100%
+  );
   pointer-events: none;
 }
 
