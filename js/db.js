@@ -205,7 +205,7 @@ class PortfolioDB {
       }
     } catch (_) {}
 
-    // Sincronizar con Firebase Cloud Firestore si está disponible
+    // Sincronizar con Firebase Cloud Firestore si está disponible (100% gratis)
     if (window.firebaseService && window.firebaseService.isAvailable()) {
       try {
         const cloudItems = await window.firebaseService.fetchActivities();
@@ -256,21 +256,13 @@ class PortfolioDB {
   async saveActivity(activity) {
     this.memoryStore.set(activity.id, activity);
 
-    // 1. Si Firebase está activo y se adjuntó un archivo PDF, subirlo a Firebase Storage
+    // 1. Guardar en Cloud Firestore (sincronización instantánea para todo el equipo)
     if (window.firebaseService && window.firebaseService.isAvailable()) {
       try {
-        if (activity.pdfBlob instanceof Blob && (!activity.pdfUrl || activity.pdfUrl.startsWith('blob:'))) {
-          const cloudPdfUrl = await window.firebaseService.uploadPdf(activity.pdfBlob, activity.id);
-          if (cloudPdfUrl) {
-            activity.pdfUrl = cloudPdfUrl;
-            console.log('✅ PDF subido exitosamente a Firebase Storage:', cloudPdfUrl);
-          }
-        }
-        // Guardar metadata en Cloud Firestore
         await window.firebaseService.saveActivity(activity);
-        console.log('✅ Actividad guardada en Cloud Firestore');
+        console.log('✅ Actividad sincronizada en Cloud Firestore');
       } catch (fbErr) {
-        console.warn('⚠️ Fallo guardado en Firebase, conservando en almacenamiento local:', fbErr);
+        console.warn('⚠️ Fallo guardado en Firestore, conservando en almacenamiento local:', fbErr);
       }
     }
 
@@ -309,12 +301,12 @@ class PortfolioDB {
   async deleteActivity(id) {
     this.memoryStore.delete(id);
 
-    // Eliminar de Firebase si está conectado
+    // Eliminar de Cloud Firestore
     if (window.firebaseService && window.firebaseService.isAvailable()) {
       try {
         await window.firebaseService.deleteActivity(id);
       } catch (fbErr) {
-        console.warn('Error al eliminar de Firebase:', fbErr);
+        console.warn('Error al eliminar de Firestore:', fbErr);
       }
     }
 

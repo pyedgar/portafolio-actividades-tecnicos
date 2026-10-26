@@ -1,7 +1,7 @@
 /**
  * Configuración de Firebase para Portafolio de Actividades
  * Proyecto: portafolio-75c1f
- * Almacenamiento en la nube (Firestore Database + Firebase Storage)
+ * Almacenamiento 100% GRATUITO sin tarjeta (Cloud Firestore Spark Plan)
  */
 
 const firebaseConfig = {
@@ -16,16 +16,14 @@ const firebaseConfig = {
 
 let firebaseApp = null;
 let firestoreDb = null;
-let firebaseStorage = null;
 let isFirebaseOnline = false;
 
 try {
   if (typeof firebase !== 'undefined' && firebase.initializeApp) {
     firebaseApp = firebase.initializeApp(firebaseConfig);
     firestoreDb = firebase.firestore();
-    firebaseStorage = firebase.storage();
     isFirebaseOnline = true;
-    console.log('✅ Firebase inicializado correctamente para el proyecto portafolio-75c1f');
+    console.log('✅ Firebase Cloud Firestore activo y conectado (100% gratuito, plan Spark)');
   }
 } catch (e) {
   console.warn('⚠️ No se pudo inicializar Firebase, operando en modo local:', e);
@@ -37,39 +35,23 @@ window.firebaseService = {
   },
 
   /**
-   * Sube un archivo PDF a Firebase Storage y retorna la URL pública de descarga
-   */
-  async uploadPdf(file, activityId) {
-    if (!firebaseStorage || !file) return null;
-    try {
-      const cleanFileName = (file.name || 'actividad.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
-      const storagePath = `actividades_pdf/${activityId}_${Date.now()}_${cleanFileName}`;
-      const storageRef = firebaseStorage.ref().child(storagePath);
-
-      const metadata = {
-        contentType: file.type || 'application/pdf',
-        customMetadata: {
-          originalName: file.name,
-          activityId: activityId
-        }
-      };
-
-      const snapshot = await storageRef.put(file, metadata);
-      const downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
-    } catch (err) {
-      console.warn('⚠️ Error al subir PDF a Firebase Storage:', err);
-      return null;
-    }
-  },
-
-  /**
    * Guarda o actualiza los datos de la actividad en Cloud Firestore
+   * Si el PDF es menor a 850KB, se almacena en Base64 en Firestore directamente
    */
   async saveActivity(activity) {
     if (!firestoreDb) return false;
     try {
-      // Objeto limpio sin Blobs para Firestore
+      let pdfBase64Cloud = null;
+
+      // Si tenemos el archivo y mide menos de 850 KB, lo guardamos en la nube gratis
+      if (activity.pdfBlob instanceof Blob && activity.pdfSize < 850000) {
+        try {
+          pdfBase64Cloud = await this.blobToBase64(activity.pdfBlob);
+        } catch (_) {}
+      } else if (activity.pdfBase64 && (activity.pdfSize || 0) < 850000) {
+        pdfBase64Cloud = activity.pdfBase64;
+      }
+
       const docData = {
         id: activity.id,
         nombre: activity.nombre || '',
@@ -81,6 +63,7 @@ window.firebaseService = {
         pdfSize: activity.pdfSize || 0,
         pdfType: activity.pdfType || 'application/pdf',
         pdfUrl: activity.pdfUrl || null,
+        pdfBase64: pdfBase64Cloud,
         createdAt: activity.createdAt || Date.now(),
         updatedAt: Date.now()
       };
@@ -94,7 +77,7 @@ window.firebaseService = {
   },
 
   /**
-   * Elimina una actividad de Firestore
+   * Elimina una actividad de Cloud Firestore
    */
   async deleteActivity(id) {
     if (!firestoreDb) return false;
@@ -108,7 +91,7 @@ window.firebaseService = {
   },
 
   /**
-   * Obtiene todas las actividades guardadas en Firestore
+   * Obtiene todas las actividades guardadas en Cloud Firestore
    */
   async fetchActivities() {
     if (!firestoreDb) return [];
@@ -116,7 +99,13 @@ window.firebaseService = {
       const snap = await firestoreDb.collection('actividades').get();
       const list = [];
       snap.forEach(doc => {
-        list.push(doc.data());
+        const data = doc.data();
+        if (data.pdfBase64 && !data.pdfBlob) {
+          try {
+            data.pdfBlob = this.base64ToBlob(data.pdfBase64, data.pdfType || 'application/pdf');
+          } catch (_) {}
+        }
+        list.push(data);
       });
       return list;
     } catch (err) {
@@ -135,7 +124,13 @@ window.firebaseService = {
         (snapshot) => {
           const list = [];
           snapshot.forEach(doc => {
-            list.push(doc.data());
+            const data = doc.data();
+            if (data.pdfBase64 && !data.pdfBlob) {
+              try {
+                data.pdfBlob = this.base64ToBlob(data.pdfBase64, data.pdfType || 'application/pdf');
+              } catch (_) {}
+            }
+            list.push(data);
           });
           callback(list);
         },
@@ -147,5 +142,25 @@ window.firebaseService = {
       console.warn('⚠️ No se pudo iniciar onSnapshot:', err);
       return () => {};
     }
+  },
+
+  blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  },
+
+  base64ToBlob(dataUrl, mime = 'application/pdf') {
+    const arr = dataUrl.split(',');
+    const bstr = atob(arr[1] || arr[0]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
   }
 };
