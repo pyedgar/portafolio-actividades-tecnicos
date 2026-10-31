@@ -6,6 +6,21 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+
+  <!-- Seguridad Reforzada contra Hacking Intermedio, Inyección y Clickjacking -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <!-- Redirección Automática a HTTPS Seguro en Dominio Personalizado -->
+  <script>
+    if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      try {
+        location.replace('https://' + location.host + location.pathname + location.search + location.hash);
+      } catch (_) {}
+    }
+  </script>
+
   <title>Portafolio de Actividades - Los Técnicos | Cursos Lunes</title>
   
   <!-- Favicon e Iconos (Lucide Icons & Google Fonts) -->
@@ -583,11 +598,14 @@
       <div class="radio-station-selector">
         <label for="radioStationSelect"><i class="fa-solid fa-headphones"></i> Seleccionar Canal:</label>
         <select id="radioStationSelect" class="form-control form-control-sm">
-          <option value="0">🌸 Spirited Away - One Summer's Day (Lofi Chill)</option>
-          <option value="1">🍃 My Neighbor Totoro - Ghibli Piano Chill</option>
-          <option value="2">🐺 Princess Mononoke - Ashitaka Theme Chill</option>
-          <option value="3">📻 LISTEN.moe Anime Radio (24/7 En Vivo)</option>
-          <option value="4">🌙 Anime Chill & Future Funk (Yumi.moe)</option>
+          <option value="0">🔥 Anime Nexus - Openings & J-Rock 24/7</option>
+          <option value="1">📻 LISTEN.moe - Anime Soundtracks & J-Pop</option>
+          <option value="2">🎸 Rock Antenne - Classic Rock Perlen (Queen, AC/DC, Zeppelin)</option>
+          <option value="3">⚡ Laut.fm - Leyendas del Rock Clásico 70s & 80s</option>
+          <option value="4">💿 I Love Radio - Greatest Classic Rock Hits</option>
+          <option value="5">🌸 Spirited Away - One Summer's Day (Lofi Chill)</option>
+          <option value="6">🍃 My Neighbor Totoro - Ghibli Piano Chill</option>
+          <option value="7">🐺 Princess Mononoke - Ashitaka Theme Chill</option>
         </select>
       </div>
     </div>
@@ -1112,9 +1130,9 @@
   <!-- Firebase SDK (Compat v10) - 100% Gratuito sin tarjeta -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=20261031_auth_v3"></script>
-  <script src="js/auth.js?v=20261031_auth_v3"></script>
-  <script src="js/db.js?v=20261031_auth_v3"></script>
-  <script src="js/app.js?v=20261031_auth_v3"></script>
+  <script src="js/firebase-config.js?v=20261031_auth_v4"></script>
+  <script src="js/auth.js?v=20261031_auth_v4"></script>
+  <script src="js/db.js?v=20261031_auth_v4"></script>
+  <script src="js/app.js?v=20261031_auth_v4"></script>
 </body>
 </html>

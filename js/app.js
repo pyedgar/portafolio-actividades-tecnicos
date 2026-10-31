@@ -252,9 +252,49 @@ function setupAnimeVideoControls() {
 }
 
 // =========================================================
-// RADIO OTAKU CLÁSICA & TRANQUI (REPRODUCTOR DE MÚSICA ANIME)
+// REPRODUCTOR DE MÚSICA: OPENINGS DE ANIME & ROCK CLÁSICO
 // =========================================================
 const OTAKU_RADIO_PLAYLIST = [
+  {
+    title: "Anime Nexus - Openings & J-Rock",
+    artist: "Anime Openings, Endings & J-Rock 24/7",
+    badge: "OPENINGS DE ANIME 24/7",
+    cover: "assets/images/anime/anime_neon_cyberpunk_pink.jpg",
+    url: "https://kathy.torontocast.com:1820/stream",
+    isLive: true
+  },
+  {
+    title: "LISTEN.moe Anime Radio Live",
+    artist: "J-Pop & Anime Soundtracks 24/7",
+    badge: "RADIO ANIME EN VIVO",
+    cover: "assets/images/anime/anime_neon_gojo_purple.jpg",
+    url: "https://listen.moe/stream",
+    isLive: true
+  },
+  {
+    title: "ROCK ANTENNE - Classic Rock Perlen",
+    artist: "Queen, Led Zeppelin, AC/DC, Pink Floyd & Guns N' Roses",
+    badge: "ROCK CLÁSICO 70s & 80s",
+    cover: "assets/images/anime/anime_neon_samurai.jpg",
+    url: "https://stream.rockantenne.de/classic-perlen/stream/mp3",
+    isLive: true
+  },
+  {
+    title: "Laut.fm - Classic Rock Legends",
+    artist: "Grandes Éxitos de Rock Clásico Mundial",
+    badge: "LEYENDAS DEL ROCK",
+    cover: "assets/images/anime/anime_pin_1.jpg",
+    url: "https://stream.laut.fm/classicrock",
+    isLive: true
+  },
+  {
+    title: "I Love Radio - Greatest Classic Rock Hits",
+    artist: "Rock Clásico Inmortal & Baladas de Oro",
+    badge: "ÉXITOS CLÁSICOS",
+    cover: "assets/images/anime/anime_pin_2.png",
+    url: "https://streams.ilovemusic.de/iloveradio13.mp3",
+    isLive: true
+  },
   {
     title: "Spirited Away - One Summer's Day",
     artist: "Studio Ghibli / Joe Hisaishi (Lo-Fi Chill)",
@@ -278,22 +318,6 @@ const OTAKU_RADIO_PLAYLIST = [
     cover: "assets/images/anime/anime_neon_samurai.jpg",
     url: "assets/audio/02_princess_mononoke_chill.mp3",
     isLive: false
-  },
-  {
-    title: "LISTEN.moe Anime Radio Live",
-    artist: "J-Pop & Anime Soundtracks 24/7",
-    badge: "RADIO EN VIVO 24/7",
-    cover: "assets/images/anime/anime_neon_cyberpunk_pink.jpg",
-    url: "https://listen.moe/stream",
-    isLive: true
-  },
-  {
-    title: "Anime Chillhop & Groove",
-    artist: "Future Funk & Anime Beats",
-    badge: "RADIO EN VIVO 24/7",
-    cover: "assets/images/anime/anime_neon_gojo_purple.jpg",
-    url: "https://radio.yumi.moe/stream/1/",
-    isLive: true
   }
 ];
 

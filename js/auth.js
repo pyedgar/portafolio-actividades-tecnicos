@@ -14,11 +14,65 @@
 (function () {
   const STORAGE_KEY_USER = 'portfolio_auth_user';
   const STORAGE_KEY_USERS_CACHE = 'portfolio_users_cache';
+  const STORAGE_KEY_LOGIN_ATTEMPTS = 'portfolio_auth_attempts';
   const PASSWORD_SALT = '_utc_tecnicos_auth_salt_2026_';
+
+  // Configuración de Seguridad Intermedia
+  const MAX_LOGIN_ATTEMPTS = 5;
+  const LOCKOUT_MS = 5 * 60 * 1000; // 5 minutos de bloqueo tras intentos fallidos
+  const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000; // 12 horas máximo de sesión activa
 
   let currentUser = null;
   let cachedUsers = [];
   const authListeners = [];
+
+  // Módulo Anti-Fuerza Bruta
+  function checkBruteForceLockout() {
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGIN_ATTEMPTS) || '{}');
+      if (data.lockoutUntil && Date.now() < data.lockoutUntil) {
+        const remainingSeconds = Math.ceil((data.lockoutUntil - Date.now()) / 1000);
+        const remainingMin = Math.ceil(remainingSeconds / 60);
+        return { locked: true, remainingSeconds, remainingMin };
+      }
+    } catch (_) {}
+    return { locked: false };
+  }
+
+  function recordFailedLoginAttempt() {
+    try {
+      let data = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGIN_ATTEMPTS) || '{}');
+      if (data.lockoutUntil && Date.now() > data.lockoutUntil) {
+        data = { attempts: 0 };
+      }
+      data.attempts = (data.attempts || 0) + 1;
+      if (data.attempts >= MAX_LOGIN_ATTEMPTS) {
+        data.lockoutUntil = Date.now() + LOCKOUT_MS;
+      }
+      localStorage.setItem(STORAGE_KEY_LOGIN_ATTEMPTS, JSON.stringify(data));
+      return data;
+    } catch (_) {
+      return { attempts: 1 };
+    }
+  }
+
+  function resetLoginAttempts() {
+    try {
+      localStorage.removeItem(STORAGE_KEY_LOGIN_ATTEMPTS);
+    } catch (_) {}
+  }
+
+  // Sanitizador estricto Anti-XSS (inyección de código malicioso)
+  function sanitizeInput(val) {
+    if (typeof val !== 'string') return '';
+    return val
+      .replace(/<[^>]*>?/gm, '')
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/data:/gi, '')
+      .replace(/on\w+=/gi, '')
+      .trim();
+  }
 
   // Algoritmo SHA-256 nativo en JS puro (funciona igual en HTTP, HTTPS, móvil y local)
   function pureSha256(ascii) {
@@ -204,11 +258,18 @@
      * Inicializa el servicio de autenticación
      */
     async init() {
-      // 1. Cargar usuario de sesión activa de localStorage
+      // 1. Cargar usuario de sesión activa de localStorage con validación de caducidad
       try {
         const stored = localStorage.getItem(STORAGE_KEY_USER);
         if (stored) {
-          currentUser = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          if (parsed.loginTime && (Date.now() - parsed.loginTime > SESSION_MAX_AGE_MS)) {
+            console.warn('⚠️ Sesión expirada por seguridad tras 12 horas.');
+            localStorage.removeItem(STORAGE_KEY_USER);
+            currentUser = null;
+          } else {
+            currentUser = parsed;
+          }
         }
       } catch (e) {
         currentUser = null;
@@ -310,15 +371,23 @@
     },
 
     /**
-     * Iniciar sesión con Usuario o Correo y Contraseña
+     * Iniciar sesión con Usuario o Correo y Contraseña (con protección Anti-Fuerza Bruta)
      */
     async login(identifier, password) {
       if (!identifier || !password) {
         return { success: false, message: 'Ingresa tu usuario y contraseña.' };
       }
 
-      const cleanId = identifier.trim().toLowerCase();
-      const pwdHash = await hashPassword(password);
+      // 1. Verificación de Bloqueo por Fuerza Bruta
+      const lockout = checkBruteForceLockout();
+      if (lockout.locked) {
+        return {
+          success: false,
+          message: `🛡️ Sistema bloqueado por seguridad tras múltiples intentos. Espera ${lockout.remainingMin} min (${lockout.remainingSeconds}s) para reintentar.`
+        };
+      }
+
+      const cleanId = sanitizeInput(identifier).toLowerCase();
 
       // Buscar en caché actualizado
       let user = cachedUsers.find(u => 
@@ -343,6 +412,7 @@
       }
 
       if (!user) {
+        recordFailedLoginAttempt();
         return { 
           success: false, 
           message: 'Usuario no registrado. Solicita tu cuenta al Administrador.' 
@@ -358,11 +428,22 @@
 
       const isPasswordValid = await verifyPassword(password, user);
       if (!isPasswordValid) {
+        const failData = recordFailedLoginAttempt();
+        const remaining = Math.max(0, MAX_LOGIN_ATTEMPTS - (failData.attempts || 0));
+        if (remaining === 0) {
+          return {
+            success: false,
+            message: '🛡️ Has alcanzado el límite de 5 intentos fallidos. Acceso bloqueado por 5 minutos para proteger el sistema.'
+          };
+        }
         return { 
           success: false, 
-          message: 'Contraseña incorrecta. Verifica e intenta nuevamente.' 
+          message: `Contraseña incorrecta. Te quedan ${remaining} intento(s) antes del bloqueo temporal.` 
         };
       }
+
+      // Restablecer contador de intentos al ingresar con éxito
+      resetLoginAttempts();
 
       // Migrar automáticamente el hash del usuario al estándar universal si era diferente
       const standardHash = await hashPassword(password);
@@ -574,6 +655,13 @@
       }
 
       return { success: true, message: 'Contraseña actualizada con éxito.' };
+    },
+
+    /**
+     * Sanitizar texto contra inyecciones XSS
+     */
+    sanitize(val) {
+      return sanitizeInput(val);
     },
 
     /**
