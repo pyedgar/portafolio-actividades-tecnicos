@@ -172,13 +172,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   setDefaultDateTime();
   updateCloudBadge();
 
+  await loadAndRenderActivities();
+
   // Inicializar Sistema de Autenticación, Roles y Permisos
   if (window.authService) {
     setupAuthUI();
-    await window.authService.init();
+    try {
+      await window.authService.init();
+    } catch (err) {
+      console.warn('Error al iniciar authService:', err);
+    }
   }
-
-  await loadAndRenderActivities();
 
   // Escuchar sincronización en tiempo real desde Firebase
   if (window.firebaseService && window.firebaseService.isAvailable()) {
@@ -2564,8 +2568,8 @@ function setupAuthUI() {
   window.authService.onAuthStateChanged((user) => {
     updateAuthElements(user);
     // Re-renderizar lista de actividades para mostrar u ocultar botones de eliminar
-    if (typeof allActivities !== 'undefined' && Array.isArray(allActivities)) {
-      renderActivities(currentFilteredActivities || allActivities);
+    if (typeof filterActivities === 'function' && Array.isArray(allActivities) && allActivities.length > 0) {
+      filterActivities();
     }
   });
 
