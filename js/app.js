@@ -117,6 +117,38 @@ const dom = {
   btnRestore: document.getElementById('btnRestore'),
   fileRestoreInput: document.getElementById('fileRestoreInput'),
 
+  // Autenticación y Gestión de Usuarios
+  btnOpenLogin: document.getElementById('btnOpenLogin'),
+  modalLogin: document.getElementById('modalLogin'),
+  loginForm: document.getElementById('loginForm'),
+  loginIdentifier: document.getElementById('loginIdentifier'),
+  loginPassword: document.getElementById('loginPassword'),
+  btnToggleLoginPwd: document.getElementById('btnToggleLoginPwd'),
+  toggleLoginPwdIcon: document.getElementById('toggleLoginPwdIcon'),
+  loginErrorAlert: document.getElementById('loginErrorAlert'),
+  loginErrorMessage: document.getElementById('loginErrorMessage'),
+  btnCloseLoginModal: document.getElementById('btnCloseLoginModal'),
+  btnCancelLogin: document.getElementById('btnCancelLogin'),
+
+  userSessionContainer: document.getElementById('userSessionContainer'),
+  userSessionName: document.getElementById('userSessionName'),
+  userSessionRole: document.getElementById('userSessionRole'),
+  btnAdminUsers: document.getElementById('btnAdminUsers'),
+  btnLogout: document.getElementById('btnLogout'),
+
+  modalAdminUsers: document.getElementById('modalAdminUsers'),
+  btnCloseAdminUsersModal: document.getElementById('btnCloseAdminUsersModal'),
+  btnCloseAdminUsersModalBtn: document.getElementById('btnCloseAdminUsersModalBtn'),
+  formCreateUser: document.getElementById('formCreateUser'),
+  newUserNombre: document.getElementById('newUserNombre'),
+  newUserUsername: document.getElementById('newUserUsername'),
+  newUserEmail: document.getElementById('newUserEmail'),
+  newUserPassword: document.getElementById('newUserPassword'),
+  newUserRol: document.getElementById('newUserRol'),
+  adminUsersCountBadge: document.getElementById('adminUsersCountBadge'),
+  adminUsersTableBody: document.getElementById('adminUsersTableBody'),
+  btnOpenFirebaseModal: document.getElementById('btnOpenFirebaseModal'),
+
   toastContainer: document.getElementById('toastContainer')
 };
 
@@ -139,6 +171,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   setDefaultDateTime();
   updateCloudBadge();
+
+  // Inicializar Sistema de Autenticación, Roles y Permisos
+  if (window.authService) {
+    setupAuthUI();
+    await window.authService.init();
+  }
+
   await loadAndRenderActivities();
 
   // Escuchar sincronización en tiempo real desde Firebase
@@ -787,6 +826,11 @@ function addExtraMember() {
 
 // Modal Crear
 function openCreateModal() {
+  if (window.authService && !window.authService.canManageActivities()) {
+    showToast('Acceso restringido: Inicia sesión con una cuenta autorizada para agregar actividades.', 'warning');
+    if (dom.modalLogin) dom.modalLogin.style.display = 'flex';
+    return;
+  }
   setDefaultDateTime();
   setDocSource('file');
   dom.modalCreateActivity.style.display = 'flex';
@@ -1129,9 +1173,11 @@ function renderCards(list) {
                 <i class="fa-solid fa-book-open"></i> Leer / Ver PDF
               </button>
             ` : ''}
+            ${(window.authService && window.authService.canManageActivities()) ? `
             <button class="btn btn-delete-card" onclick="deleteActivity('${activity.id}')" title="Eliminar actividad">
               <i class="fa-solid fa-trash-can"></i>
             </button>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -1236,6 +1282,12 @@ function closePdfViewer() {
 
 // Eliminar actividad
 window.deleteActivity = async function(id) {
+  if (window.authService && !window.authService.canManageActivities()) {
+    showToast('Acceso restringido: Solo los técnicos autorizados pueden eliminar actividades.', 'warning');
+    if (dom.modalLogin) dom.modalLogin.style.display = 'flex';
+    return;
+  }
+
   const activity = allActivities.find(a => a.id === id);
   const name = activity ? activity.nombre : 'esta actividad';
 
@@ -2500,3 +2552,251 @@ function updateStorageQuotaDisplay() {
     }
   }
 }
+
+
+// ==========================================================================
+// CONTROL DE ACCESO, LOGIN Y GESTIÓN DE USUARIOS
+// ==========================================================================
+function setupAuthUI() {
+  if (!window.authService) return;
+
+  // 1. Escuchar cambios de estado de autenticación (Login / Logout / Roles)
+  window.authService.onAuthStateChanged((user) => {
+    updateAuthElements(user);
+    // Re-renderizar lista de actividades para mostrar u ocultar botones de eliminar
+    if (typeof allActivities !== 'undefined' && Array.isArray(allActivities)) {
+      renderActivities(currentFilteredActivities || allActivities);
+    }
+  });
+
+  // 2. Abrir / Cerrar Modal de Login
+  if (dom.btnOpenLogin) {
+    dom.btnOpenLogin.addEventListener('click', () => {
+      if (dom.loginErrorAlert) dom.loginErrorAlert.style.display = 'none';
+      if (dom.loginForm) dom.loginForm.reset();
+      if (dom.modalLogin) dom.modalLogin.style.display = 'flex';
+      if (dom.loginIdentifier) dom.loginIdentifier.focus();
+    });
+  }
+
+  if (dom.btnCloseLoginModal) {
+    dom.btnCloseLoginModal.addEventListener('click', () => {
+      if (dom.modalLogin) dom.modalLogin.style.display = 'none';
+    });
+  }
+
+  if (dom.btnCancelLogin) {
+    dom.btnCancelLogin.addEventListener('click', () => {
+      if (dom.modalLogin) dom.modalLogin.style.display = 'none';
+    });
+  }
+
+  if (dom.modalLogin) {
+    dom.modalLogin.addEventListener('click', (e) => {
+      if (e.target === dom.modalLogin) dom.modalLogin.style.display = 'none';
+    });
+  }
+
+  // 3. Ver / Ocultar Contraseña en Login
+  if (dom.btnToggleLoginPwd && dom.loginPassword && dom.toggleLoginPwdIcon) {
+    dom.btnToggleLoginPwd.addEventListener('click', () => {
+      const isPwd = dom.loginPassword.type === 'password';
+      dom.loginPassword.type = isPwd ? 'text' : 'password';
+      dom.toggleLoginPwdIcon.className = isPwd ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+    });
+  }
+
+  // 4. Formulario de Inicio de Sesión
+  if (dom.loginForm) {
+    dom.loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const identifier = (dom.loginIdentifier.value || '').trim();
+      const password = dom.loginPassword.value || '';
+
+      if (dom.loginErrorAlert) dom.loginErrorAlert.style.display = 'none';
+
+      const res = await window.authService.login(identifier, password);
+      if (res.success) {
+        if (dom.modalLogin) dom.modalLogin.style.display = 'none';
+        dom.loginForm.reset();
+        showToast(`¡Bienvenido, ${res.user.nombre}! Modo de edición activado.`, 'success');
+      } else {
+        if (dom.loginErrorAlert && dom.loginErrorMessage) {
+          dom.loginErrorMessage.textContent = res.message || 'Error al iniciar sesión.';
+          dom.loginErrorAlert.style.display = 'flex';
+        } else {
+          showToast(res.message || 'Error al iniciar sesión.', 'danger');
+        }
+      }
+    });
+  }
+
+  // 5. Botón de Cerrar Sesión
+  if (dom.btnLogout) {
+    dom.btnLogout.addEventListener('click', () => {
+      window.authService.logout();
+      showToast('Sesión cerrada. Estás en la vista general (solo lectura).', 'info');
+    });
+  }
+
+  // 6. Panel de Administración de Usuarios (Exclusivo Administrador)
+  if (dom.btnAdminUsers) {
+    dom.btnAdminUsers.addEventListener('click', async () => {
+      if (!window.authService.isAdmin()) {
+        showToast('Solo el Administrador puede gestionar las cuentas.', 'warning');
+        return;
+      }
+      if (dom.modalAdminUsers) {
+        dom.modalAdminUsers.style.display = 'flex';
+        await renderAdminUsersTable();
+      }
+    });
+  }
+
+  if (dom.btnCloseAdminUsersModal) {
+    dom.btnCloseAdminUsersModal.addEventListener('click', () => {
+      if (dom.modalAdminUsers) dom.modalAdminUsers.style.display = 'none';
+    });
+  }
+
+  if (dom.btnCloseAdminUsersModalBtn) {
+    dom.btnCloseAdminUsersModalBtn.addEventListener('click', () => {
+      if (dom.modalAdminUsers) dom.modalAdminUsers.style.display = 'none';
+    });
+  }
+
+  if (dom.modalAdminUsers) {
+    dom.modalAdminUsers.addEventListener('click', (e) => {
+      if (e.target === dom.modalAdminUsers) dom.modalAdminUsers.style.display = 'none';
+    });
+  }
+
+  // 7. Formulario de Creación de Cuentas (Admin)
+  if (dom.formCreateUser) {
+    dom.formCreateUser.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = dom.newUserNombre.value.trim();
+      const username = dom.newUserUsername.value.trim();
+      const email = dom.newUserEmail.value.trim();
+      const password = dom.newUserPassword.value;
+      const rol = dom.newUserRol.value;
+
+      const res = await window.authService.createUser({ nombre, username, email, password, rol });
+      if (res.success) {
+        showToast(res.message, 'success');
+        dom.formCreateUser.reset();
+        await renderAdminUsersTable();
+      } else {
+        showToast(res.message, 'danger');
+      }
+    });
+  }
+}
+
+// Actualizar visibilidad de elementos según el estado de la sesión
+function updateAuthElements(user) {
+  const isLoggedIn = Boolean(user && user.id);
+  const isAdmin = Boolean(user && user.rol === 'admin');
+
+  if (!isLoggedIn) {
+    // Modo Invitado (Vista General)
+    if (dom.btnOpenLogin) dom.btnOpenLogin.style.display = 'inline-flex';
+    if (dom.userSessionContainer) dom.userSessionContainer.style.display = 'none';
+    if (dom.btnOpenModal) dom.btnOpenModal.style.display = 'none';
+    if (dom.btnEmptyCreate) dom.btnEmptyCreate.style.display = 'none';
+    if (dom.btnBackup) dom.btnBackup.style.display = 'none';
+    if (dom.btnRestore) dom.btnRestore.style.display = 'none';
+    if (dom.btnOpenFirebaseModal) dom.btnOpenFirebaseModal.style.display = 'none';
+  } else {
+    // Modo Técnico o Administrador
+    if (dom.btnOpenLogin) dom.btnOpenLogin.style.display = 'none';
+    if (dom.userSessionContainer) dom.userSessionContainer.style.display = 'flex';
+    if (dom.userSessionName) dom.userSessionName.textContent = user.nombre || user.username;
+    
+    if (dom.userSessionRole) {
+      if (isAdmin) {
+        dom.userSessionRole.textContent = 'Admin';
+        dom.userSessionRole.className = 'badge-role role-admin';
+      } else {
+        dom.userSessionRole.textContent = 'Técnico';
+        dom.userSessionRole.className = 'badge-role role-tecnico';
+      }
+    }
+
+    if (dom.btnAdminUsers) {
+      dom.btnAdminUsers.style.display = isAdmin ? 'inline-flex' : 'none';
+    }
+
+    if (dom.btnOpenModal) dom.btnOpenModal.style.display = 'inline-flex';
+    if (dom.btnEmptyCreate) dom.btnEmptyCreate.style.display = 'inline-flex';
+    if (dom.btnBackup) dom.btnBackup.style.display = 'inline-flex';
+    if (dom.btnRestore) dom.btnRestore.style.display = 'inline-flex';
+    if (dom.btnOpenFirebaseModal) dom.btnOpenFirebaseModal.style.display = 'inline-flex';
+  }
+}
+
+// Renderizar la tabla de usuarios en el Panel de Administración
+async function renderAdminUsersTable() {
+  if (!dom.adminUsersTableBody || !window.authService) return;
+
+  try {
+    const users = await window.authService.getUsers();
+    if (dom.adminUsersCountBadge) {
+      dom.adminUsersCountBadge.textContent = `${users.length} cuenta${users.length === 1 ? '' : 's'}`;
+    }
+
+    const currentUser = window.authService.getCurrentUser();
+
+    if (users.length === 0) {
+      dom.adminUsersTableBody.innerHTML = `
+        <tr><td colspan="5" style="text-align:center; padding:1.25rem; color:#94a3b8;">No hay cuentas registradas.</td></tr>
+      `;
+      return;
+    }
+
+    dom.adminUsersTableBody.innerHTML = users.map(u => {
+      const isSelf = currentUser && currentUser.id === u.id;
+      const roleBadge = u.rol === 'admin' 
+        ? '<span class="badge-role role-admin">Administrador</span>' 
+        : '<span class="badge-role role-tecnico">Técnico</span>';
+
+      return `
+        <tr>
+          <td>
+            <strong>${escapeHtml(u.nombre || u.username)}</strong>
+            ${isSelf ? ' <small style="color:#fbbf24;">(Tú)</small>' : ''}
+          </td>
+          <td><code style="color:#c084fc;">${escapeHtml(u.username)}</code></td>
+          <td>${roleBadge}</td>
+          <td><span style="color:#10b981; font-size:0.78rem;"><i class="fa-solid fa-circle-check"></i> Activo</span></td>
+          <td style="text-align: right;">
+            ${isSelf ? `
+              <span style="font-size:0.75rem; color:#64748b;">En uso</span>
+            ` : `
+              <button class="btn-delete-user" onclick="deleteUserAccount('${u.id}', '${escapeHtml(u.nombre || u.username)}')" title="Eliminar cuenta">
+                <i class="fa-solid fa-trash-can"></i> Eliminar
+              </button>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.warn('Error al renderizar usuarios:', err);
+  }
+}
+
+// Función global para eliminar cuenta de usuario
+window.deleteUserAccount = async function(userId, userName) {
+  if (!confirm(`¿Estás seguro de eliminar la cuenta de "${userName}"?\nYa no podrá iniciar sesión para agregar o eliminar actividades.`)) {
+    return;
+  }
+
+  const res = await window.authService.deleteUser(userId);
+  if (res.success) {
+    showToast(res.message, 'info');
+    await renderAdminUsersTable();
+  } else {
+    showToast(res.message, 'danger');
+  }
+};

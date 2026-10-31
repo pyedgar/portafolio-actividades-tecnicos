@@ -82,16 +82,39 @@
           <span class="nav-storage-badge" id="navStorageBadge">1 GB</span>
         </button>
 
-        <button id="btnBackup" class="btn btn-secondary" title="Exportar o respaldar actividades">
+        <!-- Botón Iniciar Sesión (Público / Invitado) -->
+        <button id="btnOpenLogin" class="btn btn-anime-login" title="Acceso exclusivo para Técnicos y Administrador">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>Iniciar Sesión</span>
+        </button>
+
+        <!-- Indicador de Sesión Activa (Solo Técnicos / Administrador) -->
+        <div id="userSessionContainer" class="user-session-container" style="display: none;">
+          <div class="user-session-badge" id="userSessionBadge">
+            <i class="fa-solid fa-user-shield"></i>
+            <span id="userSessionName">Usuario</span>
+            <span id="userSessionRole" class="badge-role role-tecnico">Técnico</span>
+          </div>
+          <button id="btnAdminUsers" class="btn btn-anime-admin" style="display: none;" title="Panel de Gestión de Usuarios">
+            <i class="fa-solid fa-users-gear"></i>
+            <span>Usuarios</span>
+          </button>
+          <button id="btnLogout" class="btn btn-anime-logout" title="Cerrar Sesión">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Salir</span>
+          </button>
+        </div>
+
+        <button id="btnBackup" class="btn btn-secondary" title="Exportar o respaldar actividades" style="display: none;">
           <i class="fa-solid fa-download"></i>
           <span>Respaldar</span>
         </button>
-        <button id="btnRestore" class="btn btn-secondary" title="Importar actividades desde archivo">
+        <button id="btnRestore" class="btn btn-secondary" title="Importar actividades desde archivo" style="display: none;">
           <i class="fa-solid fa-upload"></i>
           <span>Importar</span>
         </button>
         <input type="file" id="fileRestoreInput" accept=".json" style="display:none;">
-        <button id="btnOpenModal" class="btn btn-primary btn-anime-glow">
+        <button id="btnOpenModal" class="btn btn-primary btn-anime-glow" style="display: none;">
           <i class="fa-solid fa-plus"></i>
           <span>Nueva Actividad</span>
         </button>
@@ -913,6 +936,162 @@
     </div>
   </div>
 
+  <!-- Modal de Inicio de Sesión (Acceso Técnicos / Admin) -->
+  <div id="modalLogin" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon anime-brand-glow">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <div>
+            <h3>Acceso al Portafolio</h3>
+            <span class="modal-subtitle">Técnicos & Administrador • UTC</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseLoginModal" title="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="loginForm" class="modal-body">
+        <div class="auth-notice-box">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>La <strong>vista general</strong> es de libre lectura. Solo los técnicos registrados pueden agregar y eliminar actividades. Nuevas cuentas deben ser creadas por el <strong>Administrador</strong>.</span>
+        </div>
+
+        <div id="loginErrorAlert" class="alert-error-box" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 0.6rem; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #fca5a5; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span id="loginErrorMessage">Error al iniciar sesión</span>
+        </div>
+
+        <div class="auth-form-group">
+          <label for="loginIdentifier"><i class="fa-solid fa-user"></i> Usuario o Correo Institucional</label>
+          <div class="auth-input-wrapper">
+            <i class="fa-solid fa-user input-icon-left"></i>
+            <input type="text" id="loginIdentifier" class="auth-input" placeholder="ej. edgar o edgar@utc.edu.mx" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="auth-form-group">
+          <label for="loginPassword"><i class="fa-solid fa-key"></i> Contraseña</label>
+          <div class="auth-input-wrapper">
+            <i class="fa-solid fa-lock input-icon-left"></i>
+            <input type="password" id="loginPassword" class="auth-input" placeholder="Ingresa tu contraseña" required autocomplete="current-password">
+            <button type="button" id="btnToggleLoginPwd" class="auth-toggle-pwd" title="Mostrar / Ocultar">
+              <i class="fa-solid fa-eye" id="toggleLoginPwdIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid rgba(148, 163, 184, 0.15); margin-top: 1.25rem;">
+          <button type="button" class="btn btn-secondary" id="btnCancelLogin">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-anime-glow" id="btnLoginSubmit">
+            <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Administración de Cuentas (Solo visible para Admin) -->
+  <div id="modalAdminUsers" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-title-icon anime-brand-glow" style="background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.5); color: #fbbf24;">
+            <i class="fa-solid fa-users-gear"></i>
+          </div>
+          <div>
+            <h3>Gestión de Cuentas y Accesos</h3>
+            <span class="modal-subtitle">Panel Exclusivo del Administrador</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseAdminUsersModal" title="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Formulario para Registrar Nuevo Técnico -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.5rem;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: #f1f5f9; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-user-plus text-primary"></i> Registrar Nueva Cuenta de Técnico
+          </h4>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">
+            Como administrador, solo tú puedes autorizar quién puede subir o eliminar actividades en el portafolio.
+          </p>
+
+          <form id="formCreateUser">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+              <div class="auth-form-group" style="margin-bottom: 0;">
+                <label for="newUserNombre">Nombre Completo</label>
+                <input type="text" id="newUserNombre" class="auth-input" style="padding-left: 0.9rem;" placeholder="ej. Carlos Rodríguez" required>
+              </div>
+              <div class="auth-form-group" style="margin-bottom: 0;">
+                <label for="newUserUsername">Usuario de Acceso</label>
+                <input type="text" id="newUserUsername" class="auth-input" style="padding-left: 0.9rem;" placeholder="ej. carlos_utc" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+              <div class="auth-form-group" style="margin-bottom: 0;">
+                <label for="newUserEmail">Correo Institucional (Opcional)</label>
+                <input type="email" id="newUserEmail" class="auth-input" style="padding-left: 0.9rem;" placeholder="ej. carlos@utc.edu.mx">
+              </div>
+              <div class="auth-form-group" style="margin-bottom: 0;">
+                <label for="newUserPassword">Contraseña Inicial</label>
+                <input type="password" id="newUserPassword" class="auth-input" style="padding-left: 0.9rem;" placeholder="Mínimo 4 caracteres" required>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600;">Rol Asignado:</label>
+                <select id="newUserRol" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(148, 163, 184, 0.3); color: #fff; padding: 0.35rem 0.65rem; border-radius: 0.4rem; font-size: 0.82rem; outline: none;">
+                  <option value="tecnico" selected>Técnico (Puede agregar y eliminar actividades)</option>
+                  <option value="admin">Administrador (Control total + Gestión de cuentas)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm" id="btnSubmitNewUser">
+                <i class="fa-solid fa-plus"></i> Crear Cuenta
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Listado de Cuentas Autorizadas -->
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-list-check text-emerald"></i> Cuentas Autorizadas en el Sistema</span>
+            <span id="adminUsersCountBadge" style="font-size: 0.75rem; background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 0.2rem 0.6rem; border-radius: 9999px;">0 cuentas</span>
+          </h4>
+
+          <div class="admin-users-table-container">
+            <table class="admin-users-table">
+              <thead>
+                <tr>
+                  <th>Técnico</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                  <th style="text-align: right;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="adminUsersTableBody">
+                <!-- Generado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="margin-top: 1.25rem;">
+        <button type="button" class="btn btn-secondary" id="btnCloseAdminUsersModalBtn">Cerrar Panel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Contenedor de Alertas Toast -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -933,8 +1112,9 @@
   <!-- Firebase SDK (Compat v10) - 100% Gratuito sin tarjeta -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=20261026_features_v6"></script>
-  <script src="js/db.js?v=20261026_features_v6"></script>
-  <script src="js/app.js?v=20261026_features_v6"></script>
+  <script src="js/firebase-config.js?v=20261031_auth_v1"></script>
+  <script src="js/auth.js?v=20261031_auth_v1"></script>
+  <script src="js/db.js?v=20261031_auth_v1"></script>
+  <script src="js/app.js?v=20261031_auth_v1"></script>
 </body>
 </html>
