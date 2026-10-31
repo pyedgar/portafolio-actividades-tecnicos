@@ -197,8 +197,15 @@
     const salted = inputPassword + PASSWORD_SALT;
 
     // 1. Clave maestra por defecto para Administrador inicial
-    const isMasterAdmin = (user.username === 'admin' || user.email === 'admin@utc.edu.mx' || user.rol === 'admin');
+    const isMasterAdmin = (user.username === 'admin' || user.username === 'edgar_reyes' || user.email === 'admin@utc.edu.mx' || user.rol === 'admin');
     if (isMasterAdmin && (inputPassword === 'admin123' || inputPassword === 'admin')) {
+      return true;
+    }
+
+    // 2. Clave inicial estándar para Técnicos oficiales del repositorio
+    const isTeamMember = (user.rol === 'tecnico' || (Array.isArray(user.alias) && user.alias.length > 0));
+    const firstPart = (user.username || '').split('_')[0].toLowerCase();
+    if (isTeamMember && (inputPassword === 'tecnico123' || inputPassword === firstPart + '123')) {
       return true;
     }
 
@@ -294,54 +301,104 @@
     },
 
     /**
-     * Sincroniza la lista de usuarios con Cloud Firestore
+     * Sincroniza la lista de usuarios con Cloud Firestore y garantiza
+     * que todos los integrantes oficiales del repositorio tengan su cuenta activa.
      */
     async syncUsersWithFirestore() {
+      // Cuentas oficiales del repositorio (Los Técnicos - Cursos Lunes UTC)
+      const defaultTeamAccounts = [
+        {
+          id: 'user_edgar',
+          username: 'edgar_reyes',
+          alias: ['edgar', 'admin', 'e_reyes'],
+          email: 'edgar@utc.edu.mx',
+          nombre: 'Edgar Reyes de la Cruz',
+          rol: 'admin',
+          rama: 'EDGAR_REYES',
+          passwordHash: await hashPassword('admin123'),
+          createdAt: 1730000000000,
+          activo: true
+        },
+        {
+          id: 'user_fatima',
+          username: 'fatima_gonzalez',
+          alias: ['fatima', 'f_gonzalez'],
+          email: 'fatima@utc.edu.mx',
+          nombre: 'Fátima Estefanía González Lozano',
+          rol: 'tecnico',
+          rama: 'FATIMA_GONZALEZ',
+          passwordHash: await hashPassword('tecnico123'),
+          createdAt: 1730000000000,
+          activo: true
+        },
+        {
+          id: 'user_kenia',
+          username: 'kenia_andrade',
+          alias: ['kenia', 'k_andrade'],
+          email: 'kenia@utc.edu.mx',
+          nombre: 'Kenia Isamara Andrade Cedillo',
+          rol: 'tecnico',
+          rama: 'KENIA_ANDRADE',
+          passwordHash: await hashPassword('tecnico123'),
+          createdAt: 1730000000000,
+          activo: true
+        },
+        {
+          id: 'user_ramiro',
+          username: 'ramiro_alfaro',
+          alias: ['ramiro', 'r_alanis'],
+          email: 'ramiro@utc.edu.mx',
+          nombre: 'Ramiro Alejandro Alfaro Alanis',
+          rol: 'tecnico',
+          rama: 'RAMIRO_ALFARO',
+          passwordHash: await hashPassword('tecnico123'),
+          createdAt: 1730000000000,
+          activo: true
+        },
+        {
+          id: 'user_miguel',
+          username: 'miguel_fuentes',
+          alias: ['miguel', 'm_fuentes'],
+          email: 'miguel@utc.edu.mx',
+          nombre: 'Miguel Fuentes Hernández',
+          rol: 'tecnico',
+          rama: 'MIGUEL_FUENTES',
+          passwordHash: await hashPassword('tecnico123'),
+          createdAt: 1730000000000,
+          activo: true
+        }
+      ];
+
       const db = getDb();
       if (!db) {
-        // Modo sin Firestore: asegurar que exista al menos el Admin por defecto local
-        if (cachedUsers.length === 0) {
-          const defaultAdmin = {
-            id: 'admin_master_1',
-            username: 'admin',
-            email: 'admin@utc.edu.mx',
-            nombre: 'Edgar Reyes (Admin)',
-            rol: 'admin',
-            passwordHash: await hashPassword('admin123'),
-            createdAt: Date.now(),
-            activo: true
-          };
-          cachedUsers = [defaultAdmin];
-          localStorage.setItem(STORAGE_KEY_USERS_CACHE, JSON.stringify(cachedUsers));
-        }
+        defaultTeamAccounts.forEach(acc => {
+          if (!cachedUsers.some(u => u.id === acc.id || u.username === acc.username)) {
+            cachedUsers.push(acc);
+          }
+        });
+        localStorage.setItem(STORAGE_KEY_USERS_CACHE, JSON.stringify(cachedUsers));
         return;
       }
 
       try {
         const snapshot = await db.collection('usuarios').get();
-        if (snapshot.empty) {
-          // Crear el usuario Administrador maestro inicial
-          const defaultAdmin = {
-            id: 'admin_master_1',
-            username: 'admin',
-            email: 'admin@utc.edu.mx',
-            nombre: 'Edgar Reyes (Admin)',
-            rol: 'admin',
-            passwordHash: await hashPassword('admin123'),
-            createdAt: Date.now(),
-            activo: true
-          };
-          await db.collection('usuarios').doc(defaultAdmin.id).set(defaultAdmin);
-          cachedUsers = [defaultAdmin];
-        } else {
-          const list = [];
-          snapshot.forEach(doc => {
-            list.push(doc.data());
-          });
-          cachedUsers = list;
+        const existingUsers = [];
+        snapshot.forEach(doc => existingUsers.push(doc.data()));
+
+        // Asegurar que los 5 técnicos oficiales existan en Firestore
+        for (const acc of defaultTeamAccounts) {
+          const already = existingUsers.find(u => 
+            u.id === acc.id || 
+            (u.username && u.username.toLowerCase() === acc.username) ||
+            (u.email && u.email.toLowerCase() === acc.email)
+          );
+          if (!already) {
+            await db.collection('usuarios').doc(acc.id).set(acc, { merge: true });
+            existingUsers.push(acc);
+          }
         }
 
-        // Guardar respaldo en caché local
+        cachedUsers = existingUsers;
         localStorage.setItem(STORAGE_KEY_USERS_CACHE, JSON.stringify(cachedUsers));
 
         // Escuchar cambios en vivo en la colección de usuarios
@@ -389,24 +446,23 @@
 
       const cleanId = sanitizeInput(identifier).toLowerCase();
 
-      // Buscar en caché actualizado
+      // Buscar en caché actualizado (por username, email, nombre de rama o alias)
       let user = cachedUsers.find(u => 
         (u.username && u.username.toLowerCase() === cleanId) || 
-        (u.email && u.email.toLowerCase() === cleanId)
+        (u.email && u.email.toLowerCase() === cleanId) ||
+        (u.rama && u.rama.toLowerCase() === cleanId) ||
+        (Array.isArray(u.alias) && u.alias.some(al => al.toLowerCase() === cleanId))
       );
 
       // Si no está en caché y Firestore está en línea, verificar directo
       const db = getDb();
       if (!user && db) {
         try {
-          const qByUsername = await db.collection('usuarios').where('username', '==', cleanId).limit(1).get();
-          if (!qByUsername.empty) {
-            user = qByUsername.docs[0].data();
-          } else {
-            const qByEmail = await db.collection('usuarios').where('email', '==', cleanId).limit(1).get();
-            if (!qByEmail.empty) {
-              user = qByEmail.docs[0].data();
-            }
+          let q = await db.collection('usuarios').where('username', '==', cleanId).limit(1).get();
+          if (q.empty) q = await db.collection('usuarios').where('email', '==', cleanId).limit(1).get();
+          if (q.empty) q = await db.collection('usuarios').where('rama', '==', cleanId.toUpperCase()).limit(1).get();
+          if (!q.empty) {
+            user = q.docs[0].data();
           }
         } catch (_) {}
       }
